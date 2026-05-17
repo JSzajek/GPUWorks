@@ -13,6 +13,7 @@
 class UGPUContextObject;
 class UGPUBufferObject;
 class UGPUImageObject;
+class UGPUProgramAsset;
 
 UCLASS(BlueprintType)
 class GPUWORKS_API UGPUProgramObject : public UObject
@@ -22,6 +23,11 @@ public:
     UFUNCTION(BlueprintCallable, Category = "GPU")
     bool BuildFromSource(UGPUContextObject* contextObject,
                          const FString& source);
+
+    UFUNCTION(BlueprintCallable, Category = "GPU")
+    bool BuildFromAsset(UGPUContextObject* contextObject,
+						UGPUProgramAsset* asset);
+	
 
 	UFUNCTION(BlueprintCallable, Category = "GPU")
     void SetKernel(const FString& kernelName);

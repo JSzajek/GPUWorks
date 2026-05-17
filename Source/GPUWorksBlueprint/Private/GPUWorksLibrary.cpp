@@ -54,7 +54,7 @@ void UGPUWorksLibrary::BeginDestroy()
 void UGPUWorksLibrary::InitializeLibray()
 {
 	mpGlobalGPUContext = NewObject<UGPUContextObject>(GetTransientPackage(), NAME_None, RF_Transient);
-	mpGlobalGPUContext->Initialize(EGpuBackend::OpenCL);
+	mpGlobalGPUContext->Initialize(EGPUBackend::OpenCL);
 }
 
 void UGPUWorksLibrary::DeinitializeLibray()
@@ -75,7 +75,7 @@ IMPLEMENT_MODULE(FGPUWorksBlueprintModule, GPUWorksBlueprint)
 UGPUContextObject* UGPUWorksLibrary::CreateCustomContext(int32 deviceIndex)
 {
 	UGPUContextObject* context = NewObject<UGPUContextObject>(GetTransientPackage(), NAME_None, RF_Transient);
-	context->Initialize(EGpuBackend::OpenCL);
+	context->Initialize(EGPUBackend::OpenCL);
 
 	if (!context->IsValidContext())
 	{
@@ -95,10 +95,11 @@ UGPUProgramObject* UGPUWorksLibrary::CreateProgram(UGPUProgramAsset* asset,
 		return nullptr;
 	}
 
-	UGPUProgramObject* program = NewObject<UGPUProgramObject>(GetTransientPackage(), NAME_None, RF_Transient);
-	program->BuildFromSource(contextOverride ? contextOverride : mpGlobalGPUContext.Get(),
-							 asset->SourceCode);
+	UGPUContextObject* context = contextOverride ? contextOverride : mpGlobalGPUContext.Get();
+	FString sourceCode = asset->GetSourceCodeForBackend(context->GetGPUBackend());
 
+	UGPUProgramObject* program = NewObject<UGPUProgramObject>(GetTransientPackage(), NAME_None, RF_Transient);
+	program->BuildFromSource(context, sourceCode);
 	program->SetKernel(kernelName);
 
 	if (!program->IsValidProgram())

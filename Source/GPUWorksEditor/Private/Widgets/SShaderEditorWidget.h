@@ -2,6 +2,7 @@
 
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets//SLineNumberBox.h"
+#include "Widgets/Input/STextComboBox.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
 
 #include "GPUWorksLib.h"
@@ -19,13 +20,20 @@ public:
 private:
 	FReply OnCompileClicked();
 	void OnSourceChanged(const FText& NewText);
+	void OnProgramLanguageChanged(TSharedPtr<FString> newSelection,
+								  ESelectInfo::Type selectInfo);
 	FReply OnHandleKeyDown(const FGeometry& MyGeometry,
 						   const FKeyEvent& InKeyEvent);
 
 	void InsertTabOrUnindent(bool shiftMod);
 	void UpdateLineNumbers(const FString& Text);
+
+	EGPUBackend GetSelectedBackend() const;
 private:
 	TWeakObjectPtr<UGPUProgramAsset> mpProgramAsset;
+
+	TArray<TSharedPtr<FString>> mProgramLanguageOptions;
+	TSharedPtr<STextComboBox> mpProgramLanguageComboBox;
 
 	TSharedPtr<SMultiLineEditableTextBox> mpSourceEditor;
 	TSharedPtr<STextBlock> mpStatusText;

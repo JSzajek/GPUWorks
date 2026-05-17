@@ -6,6 +6,13 @@
 
 void SShaderEditorWidget::Construct(const FArguments& InArgs)
 {
+	mProgramLanguageOptions =
+	{
+		MakeShared<FString>("OpenCL_C"),
+		MakeShared<FString>("CUDA_C"),
+		MakeShared<FString>("SharedGPUDSL"),
+	};
+
 	mpProgramAsset = InArgs._ProgramAsset;
 
 	// Initial Internal Data --------------------
@@ -28,6 +35,13 @@ void SShaderEditorWidget::Construct(const FArguments& InArgs)
 		+ SVerticalBox::Slot().AutoHeight().Padding(2)
 		[
 			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth().Padding(5, 0)
+			[
+				SAssignNew(mpProgramLanguageComboBox, STextComboBox)
+						   .OptionsSource(&mProgramLanguageOptions)
+						   .InitiallySelectedItem(mProgramLanguageOptions[0])
+						   .OnSelectionChanged(this, &SShaderEditorWidget::OnProgramLanguageChanged)
+			]
 			+ SHorizontalBox::Slot().AutoWidth().Padding(2)
 			[
 				SNew(SButton).Text(FText::FromString("Compile"))
@@ -51,7 +65,7 @@ void SShaderEditorWidget::Construct(const FArguments& InArgs)
 
 			+ SHorizontalBox::Slot().FillWidth(1)
 			[
-				SAssignNew(mpSourceEditor, SMultiLineEditableTextBox).Text(FText::FromString(mpProgramAsset.IsValid() ? mpProgramAsset->SourceCode : TEXT("")))
+				SAssignNew(mpSourceEditor, SMultiLineEditableTextBox).Text(FText::FromString(mpProgramAsset.IsValid() ? mpProgramAsset->GetSourceCodeForBackend(GetSelectedBackend()) : TEXT("")))
 																     .OnTextChanged(this, &SShaderEditorWidget::OnSourceChanged)
 																	 .OnKeyDownHandler(this, &SShaderEditorWidget::OnHandleKeyDown)
 																     .Font(FAppStyle::GetFontStyle("MonoFont"))
@@ -77,7 +91,10 @@ void SShaderEditorWidget::Construct(const FArguments& InArgs)
 	OnCompileClicked();
 	
 	if (mpProgramAsset.IsValid())
-		UpdateLineNumbers(mpProgramAsset->SourceCode);
+	{
+		FString programSource = mpProgramAsset->GetSourceCodeForBackend(GetSelectedBackend());
+		UpdateLineNumbers(programSource);
+	}
 }
 
 FReply SShaderEditorWidget::OnCompileClicked()
@@ -85,16 +102,19 @@ FReply SShaderEditorWidget::OnCompileClicked()
 	if (!mpProgramAsset.IsValid())
 		return FReply::Handled();
 
+	FString programSource = mpProgramAsset->GetSourceCodeForBackend(GetSelectedBackend());
+
 	FString compileLog = "";
 	bool success = true;
-	if (mpProgramAsset->SourceCode.IsEmpty())
+
+	if (programSource.IsEmpty())
 	{
 		success = false;
 		compileLog = "Empty Program!";
 	}
 	else
 	{
-		const std::string sourceCode(TCHAR_TO_UTF8(*mpProgramAsset->SourceCode));
+		const std::string sourceCode(TCHAR_TO_UTF8(*programSource));
 		std::string buildLog;
 		std::shared_ptr<Gpu::IProgram> program = mpProgramData->mpGPUContext->CreateProgramFromSource(sourceCode, &buildLog);
 
@@ -121,10 +141,16 @@ void SShaderEditorWidget::OnSourceChanged(const FText& NewText)
 	if (mpProgramAsset.IsValid())
 	{
 		mpProgramAsset->Modify();
-		mpProgramAsset->SourceCode = NewText.ToString();
+		mpProgramAsset->SetSourceCodeForBackend(GetSelectedBackend(), NewText.ToString());
 	}
 
 	UpdateLineNumbers(NewText.ToString());
+}
+
+void SShaderEditorWidget::OnProgramLanguageChanged(TSharedPtr<FString> newSelection,
+												   ESelectInfo::Type selectInfo)
+{
+	mpSourceEditor->SetText(FText::FromString(mpProgramAsset.IsValid() ? mpProgramAsset->GetSourceCodeForBackend(GetSelectedBackend()) : TEXT("")));
 }
 
 FReply SShaderEditorWidget::OnHandleKeyDown(const FGeometry& MyGeometry, 
@@ -202,4 +228,22 @@ void SShaderEditorWidget::UpdateLineNumbers(const FString& Text)
 	{
 		mpLineNumberDisplay->UpdateLineNumbers(Lines.Num());
 	}
+}
+
+EGPUBackend SShaderEditorWidget::GetSelectedBackend() const
+{
+	if (mpProgramLanguageComboBox.IsValid())
+	{
+		TSharedPtr<FString> selectedItem = mpProgramLanguageComboBox->GetSelectedItem();
+		if (selectedItem.IsValid())
+		{
+			if (*selectedItem == "OpenCL_C")
+				return EGPUBackend::OpenCL;
+			else if (*selectedItem == "CUDA_C")
+				return EGPUBackend::CUDA;
+			else if (*selectedItem == "SharedGPUDSL")
+				return EGPUBackend::Unknown;
+		}
+	}
+	return EGPUBackend::Unknown;
 }

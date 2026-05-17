@@ -12,17 +12,19 @@ UGPUProgramAssetFactory::UGPUProgramAssetFactory(const FObjectInitializer& Objec
 }
 
 UObject* UGPUProgramAssetFactory::FactoryCreateNew(UClass* Class,
-												  UObject* InParent, 
-												  FName Name, 
-												  EObjectFlags Flags, 
-												  UObject* Context, 
-												  FFeedbackContext* Warn)
+												   UObject* InParent, 
+												   FName Name, 
+												   EObjectFlags Flags, 
+												   UObject* Context, 
+												   FFeedbackContext* Warn)
 {
 	UGPUProgramAsset* NewAsset = NewObject<UGPUProgramAsset>(InParent, Class, Name, Flags);
 	if (NewAsset)
 	{
 		NewAsset->ProgramName = Name.ToString();
-		NewAsset->SourceCode = "__kernel void example()\n{\n}";
+		NewAsset->Language = EGPUProgramLanguage::OpenCL_C;
+		NewAsset->SetSourceCodeForBackend(EGPUBackend::OpenCL, "__kernel void example()\n{\n}");
+		NewAsset->SetSourceCodeForBackend(EGPUBackend::CUDA, "extern \"C\" __global__ void example()\n{\n}");
 	}
 
 	return NewAsset;

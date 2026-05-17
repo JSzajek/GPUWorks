@@ -981,7 +981,7 @@ void FGPUUnitTestsSpecs::Define()
 			mpGPUContextObj = NewObject<UGPUContextObject>();
 			if (mpGPUContextObj)
 			{
-				mpGPUContextObj->Initialize(EGpuBackend::OpenCL);
+				mpGPUContextObj->Initialize(EGPUBackend::OpenCL);
 				mpGPUContextObj->CreateDefaultQueue();
 			}
 		});

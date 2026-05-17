@@ -3,6 +3,8 @@
 #include "Interops/UE/GPUBufferObject.h"
 #include "Interops/UE/GPUImageObject.h"
 
+#include "Assets/GPUProgramAsset.h"
+
 bool UGPUProgramObject::BuildFromSource(UGPUContextObject* contextObject,
                                         const FString& source)
 {
@@ -14,6 +16,25 @@ bool UGPUProgramObject::BuildFromSource(UGPUContextObject* contextObject,
 
     std::string buildLog;
     Program = contextObject->GetContext()->CreateProgramFromSource(TCHAR_TO_UTF8(*source),
+                                                                   &buildLog);
+
+    LastBuildLog = UTF8_TO_TCHAR(buildLog.c_str());
+    return Program != nullptr;
+}
+
+bool UGPUProgramObject::BuildFromAsset(UGPUContextObject* contextObject,
+                                       UGPUProgramAsset* asset)
+{
+    if (!contextObject || !contextObject->GetContext())
+    {
+        LastBuildLog = TEXT("Invalid GPU context.");
+        return false;
+    }
+
+	FString programSource = asset->GetSourceCodeForBackend(contextObject->GetGPUBackend());
+
+    std::string buildLog;
+    Program = contextObject->GetContext()->CreateProgramFromSource(TCHAR_TO_UTF8(*programSource),
                                                                    &buildLog);
 
     LastBuildLog = UTF8_TO_TCHAR(buildLog.c_str());

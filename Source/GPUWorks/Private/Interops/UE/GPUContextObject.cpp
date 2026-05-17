@@ -2,10 +2,12 @@
 
 #include "GPU/GPUDevice.h"
 
-bool UGPUContextObject::Initialize(EGpuBackend backend,
+bool UGPUContextObject::Initialize(EGPUBackend backend,
                                    int32 deviceIndex)
 {
-    const Gpu::Backend nativeBackend = (backend == EGpuBackend::OpenCL) ? Gpu::Backend::OpenCL : Gpu::Backend::CUDA;
+    mBackend = backend;
+
+    const Gpu::Backend nativeBackend = (backend == EGPUBackend::OpenCL) ? Gpu::Backend::OpenCL : Gpu::Backend::CUDA;
 
     mpCore = Gpu::Factory::Create(nativeBackend);
     if (!mpCore)

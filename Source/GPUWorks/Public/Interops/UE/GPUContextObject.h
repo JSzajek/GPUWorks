@@ -11,8 +11,10 @@
 #include "GPUContextObject.generated.h"
 
 UENUM(BlueprintType)
-enum class EGpuBackend : uint8
+enum class EGPUBackend : uint8
 {
+    Unknown,
+
     OpenCL,
     CUDA
 };
@@ -23,7 +25,7 @@ class GPUWORKS_API UGPUContextObject : public UObject
     GENERATED_BODY()
 public:
     UFUNCTION(BlueprintCallable, Category="GPU")
-    bool Initialize(EGpuBackend backend,
+    bool Initialize(EGPUBackend backend,
                     int32 deviceIndex = 0);
 
     UFUNCTION(BlueprintCallable, Category="GPU")
@@ -38,11 +40,15 @@ public:
     UFUNCTION(BlueprintCallable, Category = "GPU")
     bool HasImageSupport() const;
 
+	EGPUBackend GetGPUBackend() const { return mBackend; }
+
     std::shared_ptr<Gpu::ICore> GetCore() const { return mpCore; }
     std::shared_ptr<Gpu::IDevice> GetDevice() const { return mpDevice; }
     std::shared_ptr<Gpu::IContext> GetContext() const { return mpContext; }
     std::shared_ptr<Gpu::IQueue> GetDefaultQueue() const { return mpDefaultQueue; }
 private:
+	EGPUBackend mBackend = EGPUBackend::Unknown;
+
     std::shared_ptr<Gpu::ICore> mpCore;
     std::shared_ptr<Gpu::IDevice> mpDevice;
     std::shared_ptr<Gpu::IContext> mpContext;
