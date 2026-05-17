@@ -1,0 +1,21 @@
+#pragma once
+
+#include "Stats/Stats.h"
+
+DECLARE_STATS_GROUP(TEXT("GGPU"), STATGROUP_GGPU, STATCAT_Advanced);
+
+DECLARE_FLOAT_COUNTER_STAT(TEXT("Kernel Time (ms)"), STAT_GGPU_KernelTimeMs, STATGROUP_GGPU);
+
+DECLARE_DWORD_COUNTER_STAT(TEXT("Completed Kernels"), STAT_GGPU_CompletedKernels, STATGROUP_GGPU);
+DECLARE_DWORD_COUNTER_STAT(TEXT("Total Compute Units"), STAT_GGPU_TotalComputeUnits, STATGROUP_GGPU);
+DECLARE_DWORD_COUNTER_STAT(TEXT("Total Work Groups"), STAT_GGPU_TotalWorkgroups, STATGROUP_GGPU);
+DECLARE_DWORD_COUNTER_STAT(TEXT("Preferred Work Group Multiple"), STAT_GGPU_PreferredWorkgroupsMultiple, STATGROUP_GGPU);
+DECLARE_DWORD_COUNTER_STAT(TEXT("Compiled Work Group Size - Dim1"), STAT_GGPU_CompiledWorkGroupsize_Dim1, STATGROUP_GGPU);
+DECLARE_DWORD_COUNTER_STAT(TEXT("Compiled Work Group Size - Dim2"), STAT_GGPU_CompiledWorkGroupsize_Dim2, STATGROUP_GGPU);
+DECLARE_DWORD_COUNTER_STAT(TEXT("Compiled Work Group Size - Dim3"), STAT_GGPU_CompiledWorkGroupsize_Dim3, STATGROUP_GGPU);
+DECLARE_DWORD_COUNTER_STAT(TEXT("Active Kernels"), STAT_GGPU_ActiveKernels, STATGROUP_GGPU);
+
+DECLARE_MEMORY_STAT(TEXT("Active Private"), STAT_GGPU_ActivePrivateMemory, STATGROUP_GGPU);
+DECLARE_MEMORY_STAT(TEXT("Active Local"), STAT_GGPU_ActiveLocalMemory, STATGROUP_GGPU);
+DECLARE_MEMORY_STAT(TEXT("Hardware Global"), STAT_GGPU_HardwareGlobalMemory, STATGROUP_GGPU);
+DECLARE_MEMORY_STAT(TEXT("Hardware Local"), STAT_GGPU_HardwareLocalMemory, STATGROUP_GGPU);
