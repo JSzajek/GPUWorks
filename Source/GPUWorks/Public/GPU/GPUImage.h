@@ -93,9 +93,26 @@ namespace Gpu
                               const ImageRegion& region,
                               const ImageLayout& layout = {}) = 0;
 
-        virtual std::shared_ptr<IEvent> Fill(IQueue& queue,
-                                             const void* value,
-                                             size_t valueSize,
-                                             const ImageRegion& region) = 0;
+        virtual bool Fill(IQueue& queue,
+                          const void* value,
+                          size_t valueSize,
+                          const ImageRegion& region) = 0;
+
+        virtual std::shared_ptr<IEvent> UploadAsync(IQueue& queue,
+                                                    const void* srcData,
+                                                    size_t srcBytes,
+                                                    const ImageRegion& region,
+                                                    const ImageLayout& layout = {}) = 0;
+
+        virtual std::shared_ptr<IEvent> DownloadAsync(IQueue& queue,
+                                                      void* dstData,
+                                                      size_t dstBytes,
+                                                      const ImageRegion& region,
+                                                      const ImageLayout& layout = {}) = 0;
+
+        virtual std::shared_ptr<IEvent> FillAsync(IQueue& queue,
+                                                  const void* value,
+                                                  size_t valueSize,
+                                                  const ImageRegion& region) = 0;
     };
 }

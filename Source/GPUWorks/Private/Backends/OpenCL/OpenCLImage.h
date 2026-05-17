@@ -39,18 +39,35 @@ namespace Gpu
                                 const void* srcData,
                                 size_t srcBytes,
                                 const ImageRegion& region,
-                                const ImageLayout& layout) override;
+                                const ImageLayout& layout = {}) override;
 
             virtual bool Download(IQueue& queue,
                                   void* dstData,
                                   size_t dstBytes,
                                   const ImageRegion& region,
-                                  const ImageLayout& layout) override;
+                                  const ImageLayout& layout = {}) override;
 
-            virtual std::shared_ptr<IEvent> Fill(IQueue& queue,
-                                                 const void* value,
-                                                 size_t valueSize,
-                                                 const ImageRegion& region) override;
+            virtual bool Fill(IQueue& queue,
+                              const void* value,
+                              size_t valueSize,
+                              const ImageRegion& region) override;
+
+            virtual std::shared_ptr<IEvent> UploadAsync(IQueue& queue,
+                                                        const void* srcData,
+                                                        size_t srcBytes,
+                                                        const ImageRegion& region,
+                                                        const ImageLayout& layout = {}) override;
+
+            virtual std::shared_ptr<IEvent> DownloadAsync(IQueue& queue,
+                                                          void* dstData,
+                                                          size_t dstBytes,
+                                                          const ImageRegion& region,
+                                                          const ImageLayout& layout = {}) override;
+
+            virtual std::shared_ptr<IEvent> FillAsync(IQueue& queue,
+                                                      const void* value,
+                                                      size_t valueSize,
+                                                      const ImageRegion& region) override;
 
             virtual NativeHandle GetNativeHandle() const override
             {
@@ -61,6 +78,9 @@ namespace Gpu
 
             static cl_image_format ToCLImageFormat(PixelFormat format);
             static cl_image_desc ToCLImageDesc(const ImageDescription& desc);
+        private:
+            size_t GetRequiredBytes(const ImageRegion& region,
+                                    const ImageLayout& layout) const;
         private:
             std::weak_ptr<IContext> ContextWeak;
             ImageDescription mDescription;

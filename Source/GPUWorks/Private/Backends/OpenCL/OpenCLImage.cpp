@@ -1,9 +1,35 @@
 #include "Backends/OpenCL/OpenCLImage.h"
 #include "Backends/OpenCL/OpenCLQueue.h"
 #include "Backends/OpenCL/OpenCLContext.h"
+#include "Backends/OpenCL/OpenCLEvent.h"
 
 namespace Gpu::OpenCL
 {
+    namespace
+    {
+        struct AsyncImageUploadState
+        {
+            std::shared_ptr<Event> CompletionEvent;
+            std::vector<uint8_t> StagingBytes;
+        };
+
+        static void CL_CALLBACK OnAsyncImageUploadComplete(cl_event EventHandle,
+                                                           cl_int EventStatus,
+                                                           void* UserData)
+        {
+            std::unique_ptr<AsyncImageUploadState> State(static_cast<AsyncImageUploadState*>(UserData));
+            if (State && State->CompletionEvent)
+            {
+                State->CompletionEvent->IsComplete();
+            }
+
+            if (EventHandle)
+            {
+                clReleaseEvent(EventHandle);
+            }
+        }
+    }
+
     static cl_mem_flags ToCLMemFlags(const ImageDescription& desc)
     {
         cl_mem_flags flags = 0;
@@ -49,7 +75,35 @@ namespace Gpu::OpenCL
 
     uint32_t Image::GetChannels() const
     {
-        return Gpu::GetPixelFormatSize(mDescription.Format);
+        switch (mDescription.Format)
+        {
+            case PixelFormat::R8:
+            case PixelFormat::R16F:
+            case PixelFormat::R32F:
+            case PixelFormat::R32U:
+            case PixelFormat::R32S:
+            {
+                return 1;
+            }
+            case PixelFormat::RG8:
+            case PixelFormat::RG16F:
+            case PixelFormat::RG32F:
+            case PixelFormat::RG32U:
+            {
+                return 2;
+            }
+            case PixelFormat::RGBA8:
+            case PixelFormat::RGBA16F:
+            case PixelFormat::RGBA32F:
+            case PixelFormat::RGBA32U:
+            {
+                return 4;
+            }
+            default:
+            {
+                return 0;
+            }
+        }
     }
 
     uint32_t Image::GetBytesSize() const
@@ -57,54 +111,162 @@ namespace Gpu::OpenCL
         return mDescription.Width * mDescription.Height * mDescription.DepthOrLayers * Gpu::GetPixelFormatSize(mDescription.Format);
     }
 
-    bool Image::Upload(IQueue& queueBase,
+    bool Image::Upload(IQueue& queue,
                        const void* srcData,
                        size_t srcBytes,
                        const ImageRegion& region,
                        const ImageLayout& layout)
     {
-        OpenCL::Queue* queue = reinterpret_cast<OpenCL::Queue*>(&queueBase);
-        if (!queue || !ImageObject || !srcData)
+        std::shared_ptr<IEvent> _event = UploadAsync(queue, srcData, srcBytes, region, layout);
+        if (!_event)
         {
             return false;
         }
 
-        const size_t origin[3] = { region.X, region.Y, region.Z };
-        const size_t clRegion[3] = { region.Width, region.Height, region.Depth };
-
-        const cl_int err = clEnqueueWriteImage(queue->GetCLQueue(),
-                                               ImageObject,
-                                               CL_TRUE,
-                                               origin,
-                                               clRegion,
-                                               layout.RowPitchBytes,
-                                               layout.SlicePitchBytes,
-                                               srcData,
-                                               0,
-                                               nullptr,
-                                               nullptr);
-
-        return err == CL_SUCCESS;
+        _event->Wait();
+        return _event->IsComplete();
     }
 
-    bool Image::Download(IQueue& queueBase,
+    bool Image::Download(IQueue& queue,
                          void* dstData,
                          size_t dstBytes,
                          const ImageRegion& region,
                          const ImageLayout& layout)
     {
-        OpenCL::Queue* queue = reinterpret_cast<OpenCL::Queue*>(&queueBase);
-        if (!queue || !ImageObject || !dstData)
+        std::shared_ptr<IEvent> _event = DownloadAsync(queue, dstData, dstBytes, region, layout);
+        if (!_event)
         {
             return false;
         }
 
-        const size_t origin[3] = { region.X, region.Y, region.Z };
-        const size_t clRegion[3] = { region.Width, region.Height, region.Depth };
+        _event->Wait();
+        return _event->IsComplete();
+    }
 
-        const cl_int err = clEnqueueReadImage(queue->GetCLQueue(),
+    bool Image::Fill(IQueue& queue,
+                     const void* value,
+                     size_t valueSize,
+                     const ImageRegion& region)
+    {
+        std::shared_ptr<IEvent> _event = FillAsync(queue, value, valueSize, region);
+        if (!_event)
+        {
+            return false;
+        }
+
+        _event->Wait();
+        return _event->IsComplete();
+    }
+
+    std::shared_ptr<Gpu::IEvent> Image::UploadAsync(IQueue& queue,
+                                                    const void* srcData,
+                                                    size_t srcBytes,
+                                                    const ImageRegion& region,
+                                                    const ImageLayout& layout)
+    {
+        OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
+        if (!_queue || !ImageObject || !srcData)
+        {
+            return nullptr;
+        }
+
+        const size_t RequiredBytes = GetRequiredBytes(region, layout);
+        if (RequiredBytes == 0 || srcBytes < RequiredBytes)
+        {
+            return nullptr;
+        }
+
+        const size_t origin[3] =
+        {
+            static_cast<size_t>(region.X),
+            static_cast<size_t>(region.Y),
+            static_cast<size_t>(region.Z)
+        };
+
+        const size_t clRegion[3] =
+        {
+            static_cast<size_t>(region.Width),
+            static_cast<size_t>(region.Height),
+            static_cast<size_t>(region.Depth)
+        };
+
+        std::shared_ptr<Event> Completion = std::make_shared<Event>();
+
+        auto* State = new AsyncImageUploadState();
+        State->CompletionEvent = Completion;
+        State->StagingBytes.resize(RequiredBytes);
+        std::memcpy(State->StagingBytes.data(), srcData, RequiredBytes);
+
+        cl_event WriteEvent = nullptr;
+        cl_int err = clEnqueueWriteImage(_queue->GetCLQueue(),
+                                         ImageObject,
+                                         CL_FALSE,
+                                         origin,
+                                         clRegion,
+                                         layout.RowPitchBytes,
+                                         layout.SlicePitchBytes,
+                                         State->StagingBytes.data(),
+                                         0,
+                                         nullptr,
+                                         &WriteEvent);
+
+        if (err != CL_SUCCESS || !WriteEvent)
+        {
+            delete State;
+            return nullptr;
+        }
+
+        err = clSetEventCallback(WriteEvent,
+                                 CL_COMPLETE,
+                                 &OnAsyncImageUploadComplete,
+                                 State);
+
+        if (err != CL_SUCCESS)
+        {
+            clReleaseEvent(WriteEvent);
+            delete State;
+            return nullptr;
+        }
+
+        return Completion;
+    }
+
+    std::shared_ptr<Gpu::IEvent> Image::DownloadAsync(IQueue& queue,
+                                                      void* dstData,
+                                                      size_t dstBytes,
+                                                      const ImageRegion& region,
+                                                      const ImageLayout& layout)
+    {
+        OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
+        if (!_queue || !ImageObject || !dstData)
+        {
+            return nullptr;
+        }
+
+        const size_t requiredBytes = GetRequiredBytes(region, layout);
+        if (requiredBytes == 0 || dstBytes < requiredBytes)
+        {
+            return nullptr;
+        }
+
+        const size_t origin[3] =
+        {
+            static_cast<size_t>(region.X),
+            static_cast<size_t>(region.Y),
+            static_cast<size_t>(region.Z)
+        };
+
+        const size_t clRegion[3] =
+        {
+            static_cast<size_t>(region.Width),
+            static_cast<size_t>(region.Height),
+            static_cast<size_t>(region.Depth)
+        };
+
+        cl_event readEvent = nullptr;
+        const cl_int err = clEnqueueReadImage(_queue->GetCLQueue(),
                                               ImageObject,
-                                              CL_TRUE,
+                                              CL_FALSE,
                                               origin,
                                               clRegion,
                                               layout.RowPitchBytes,
@@ -112,18 +274,23 @@ namespace Gpu::OpenCL
                                               dstData,
                                               0,
                                               nullptr,
-                                              nullptr);
+                                              &readEvent);
 
-        return err == CL_SUCCESS;
+        if (err != CL_SUCCESS || !readEvent)
+        {
+            return nullptr;
+        }
+
+        return std::static_pointer_cast<IEvent>(std::make_shared<Event>(readEvent));
     }
 
-    std::shared_ptr<IEvent> Image::Fill(IQueue& queueBase,
-                                        const void* value,
-                                        size_t valueSize,
-                                        const ImageRegion& region)
+    std::shared_ptr<Gpu::IEvent> Image::FillAsync(IQueue& queue,
+                                                  const void* value,
+                                                  size_t valueSize,
+                                                  const ImageRegion& region)
     {
-        OpenCL::Queue* queue = reinterpret_cast<OpenCL::Queue*>(&queueBase);
-        if (!queue || !ImageObject || !value)
+        OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
+        if (!_queue || !ImageObject || !value)
         {
             return nullptr;
         }
@@ -133,7 +300,7 @@ namespace Gpu::OpenCL
         const size_t clRegion[3] = { region.Width, region.Height, region.Depth };
 
         cl_event ev = nullptr;
-        const cl_int err = clEnqueueFillImage(queue->GetCLQueue(),
+        const cl_int err = clEnqueueFillImage(_queue->GetCLQueue(),
                                               ImageObject,
                                               value,
                                               origin,
@@ -238,7 +405,7 @@ namespace Gpu::OpenCL
             }
             case PixelFormat::R32S:
             {
-                out.image_channel_order = CL_RGBA;
+                out.image_channel_order = CL_R;
                 out.image_channel_data_type = CL_SIGNED_INT32;
                 break;
             }
@@ -276,4 +443,22 @@ namespace Gpu::OpenCL
         }
         return out;
     }
+
+	size_t Image::GetRequiredBytes(const ImageRegion& region,
+                                   const ImageLayout& layout) const
+	{
+        const size_t BytesPerPixel = Gpu::GetPixelFormatSize(mDescription.Format);
+        if (BytesPerPixel == 0)
+        {
+            return 0;
+        }
+
+        const size_t RowPitch = layout.RowPitchBytes != 0 ? layout.RowPitchBytes :
+                                                            static_cast<size_t>(region.Width) * BytesPerPixel;
+
+        const size_t SlicePitch = layout.SlicePitchBytes != 0 ? layout.SlicePitchBytes :
+                                                                RowPitch * static_cast<size_t>(region.Height);
+
+        return SlicePitch * static_cast<size_t>(region.Depth);
+	}
 }

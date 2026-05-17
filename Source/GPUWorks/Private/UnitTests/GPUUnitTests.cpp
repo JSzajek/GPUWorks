@@ -879,16 +879,14 @@ void FGPUUnitTestsSpecs::Define()
 
 			const std::array<float, 4> fillColor = { 0, 0, 1.0, 1.0 };
 
-			std::shared_ptr<Gpu::IEvent> event = image->Fill(*queue, fillColor.data(), sizeof(fillColor), region);
-			if (!TestTrue(TEXT("Failed To Fill Image"), event != nullptr))
+			bool success = image->Fill(*queue, fillColor.data(), sizeof(fillColor), region);
+			if (!TestTrue(TEXT("Failed To Fill Image"), success))
 				return;
-
-			event->Wait();
 
 			const size_t numBytes = image->GetBytesSize();
 			std::vector<uint8_t> output_data(numBytes, 0);
 
-			bool success = image->Download(*queue, output_data.data(), numBytes, region, {});
+			success = image->Download(*queue, output_data.data(), numBytes, region, {});
 			if (!TestTrue(TEXT("Failed To Download Image"), success))
 				return;
 

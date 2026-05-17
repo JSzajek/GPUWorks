@@ -83,7 +83,6 @@ namespace Gpu::OpenCL
     std::shared_ptr<IContext> Core::CreateContext(std::shared_ptr<IDevice> device)
     {
         // Downcast to OpenCL::Device, create cl_context, wrap in OpenCL::Context
-
         OpenCL::Device* clDevice = reinterpret_cast<OpenCL::Device*>(device.get());
         if (!clDevice)
         {

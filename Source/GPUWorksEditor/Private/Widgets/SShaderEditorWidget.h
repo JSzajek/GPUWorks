@@ -39,15 +39,4 @@ private:
 	TSharedPtr<STextBlock> mpStatusText;
 	TSharedPtr<SMultiLineEditableTextBox> mpErrorLogOutput;
 	TSharedPtr<SLineNumberBox> mpLineNumberDisplay;
-
-	struct ProgramData
-	{
-	public:
-		ProgramData() = default;
-	public:
-		std::shared_ptr<Gpu::ICore> mpGPUCore = nullptr;
-		std::shared_ptr<Gpu::IDevice> mpGPUDevice = nullptr;
-		std::shared_ptr<Gpu::IContext> mpGPUContext = nullptr;
-	};
-	TSharedPtr<ProgramData> mpProgramData;
 };

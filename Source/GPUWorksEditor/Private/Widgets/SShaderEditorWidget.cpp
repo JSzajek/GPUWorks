@@ -15,18 +15,6 @@ void SShaderEditorWidget::Construct(const FArguments& InArgs)
 
 	mpProgramAsset = InArgs._ProgramAsset;
 
-	// Initial Internal Data --------------------
-	mpProgramData = MakeShared<ProgramData>();
-
-	Gpu::FactoryDesc desc;
-	desc.PreferredBackend = Gpu::Backend::OpenCL;
-	desc.bAllowFallback = false;
-
-	mpProgramData->mpGPUCore = Gpu::Factory::Create(desc);
-	mpProgramData->mpGPUDevice = mpProgramData->mpGPUCore->GetDevice(0);
-	mpProgramData->mpGPUContext = mpProgramData->mpGPUCore->CreateContext(mpProgramData->mpGPUDevice);
-	// ------------------------------------------
-
 	ChildSlot
 	[
 		SNew(SVerticalBox)
@@ -115,11 +103,55 @@ FReply SShaderEditorWidget::OnCompileClicked()
 	else
 	{
 		const std::string sourceCode(TCHAR_TO_UTF8(*programSource));
-		std::string buildLog;
-		std::shared_ptr<Gpu::IProgram> program = mpProgramData->mpGPUContext->CreateProgramFromSource(sourceCode, &buildLog);
 
-		if (!success)
+		// Internal Data ------------------------------------------------------
+		Gpu::FactoryDesc desc;
+		desc.bAllowFallback = false;
+
+		desc.PreferredBackend = Gpu::Backend::Unknown;
+		switch (GetSelectedBackend())
+		{
+			case EGPUBackend::OpenCL:
+				desc.PreferredBackend = Gpu::Backend::OpenCL;
+				break;
+			case EGPUBackend::CUDA:
+				desc.PreferredBackend = Gpu::Backend::CUDA;
+				break;
+		}
+
+		std::shared_ptr<Gpu::ICore> core = Gpu::Factory::Create(desc);
+		if (!core)
+		{
+			success = false;
+			compileLog = "Failed to create GPU Core with the selected backend. Please ensure your system supports the selected GPU backend and try again.";
+		}
+
+		std::shared_ptr<Gpu::IDevice> device = core->GetDevice(0);
+		if (!device)
+		{
+			success = false;
+			compileLog = "Failed to create GPU Device with the selected backend. Please ensure your system supports the selected GPU backend and try again.";
+		}
+
+		std::shared_ptr<Gpu::IContext> context = core->CreateContext(device);
+		if (!context)
+		{
+			success = false;
+			compileLog = "Failed to create GPU Context with the selected backend. Please ensure your system supports the selected GPU backend and try again.";
+		}
+		// --------------------------------------------------------------------
+
+		if (success)
+		{
+			std::string buildLog;
+			std::shared_ptr<Gpu::IProgram> program = context->CreateProgramFromSource(sourceCode, &buildLog);
 			compileLog = UTF8_TO_TCHAR(buildLog.c_str());
+
+			if (!program)
+			{
+				success = false;
+			}
+		}
 	}
 
 	// Update Status Line

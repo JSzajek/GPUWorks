@@ -11,6 +11,8 @@
 #include "GPU/GPUImage.h"
 #include "GPU/GPUQueue.h"
 
+#include "Render/UTextureUtils.h"
+
 #include "GPUImageObject.generated.h"
 
 UENUM(BlueprintType)
@@ -149,17 +151,36 @@ private:
 
     bool ValidateContextAndQueue(UGPUContextObject* ContextObject) const;
 
+    uint32 GetChannelCount(Gpu::PixelFormat Format);
+
+    bool GenerateMipChain(Gpu::PixelFormat Format,
+                          uint8_t* SourceBytes,
+                          uint32_t Width,
+                          uint32_t Height,
+                          uint32_t Layers,
+                          std::vector<RenderUtils::Mip>& OutMips);
+
+    void FreeGeneratedMipChain(std::vector<RenderUtils::Mip>& Mips);
+
+    bool FillPlatformDataFromMips(FTexturePlatformData* PlatformData,
+                                  EPixelFormat UEFormat,
+                                  const std::vector<RenderUtils::Mip>& Mips,
+                                  size_t BytesPerPixel,
+                                  uint32_t BaseWidth,
+                                  uint32_t BaseHeight,
+                                  uint32_t Layers);
+
+    bool DownloadAndBuildMips(UGPUContextObject* ContextObject,
+                              bool bGenerateMips,
+                              TArray64<uint8_t>& OutBaseBytes,
+                              std::vector<RenderUtils::Mip>& OutMips);
+
     bool DownloadToCpuBytes(UGPUContextObject* ContextObject,
                             TArray64<uint8>& OutBytes) const;
 
-    bool UploadToTexture2D_Internal(UGPUContextObject* ContextObject,
-                                    UTexture2D* Texture);
-
-    bool UploadToTexture2DArray_Internal(UGPUContextObject* ContextObject,
-                                         UTexture2DArray* Texture);
-
-    bool UploadToVolumeTexture_Internal(UGPUContextObject* ContextObject,
-                                        UVolumeTexture* Texture);
+    bool UpdateTexture_Internal(FTexturePlatformData* PlatformData,
+                                UGPUContextObject* ContextObject,
+								bool bGenerateMips);
 private:
     std::shared_ptr<Gpu::IImage> Image;
 };

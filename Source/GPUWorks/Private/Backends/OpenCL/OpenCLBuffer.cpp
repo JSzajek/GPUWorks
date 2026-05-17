@@ -143,24 +143,24 @@ struct AsyncMappedTransferState
         }
     }
 
-    bool Buffer::AttachToKernel(IKernel& kernelBase,
+    bool Buffer::AttachToKernel(IKernel& kernel,
                                 uint32_t argIndex)
     {
-        OpenCL::Kernel* kernel = reinterpret_cast<OpenCL::Kernel*>(&kernelBase);
+        OpenCL::Kernel* _kernel = reinterpret_cast<OpenCL::Kernel*>(&kernel);
 
         cl_int err = CL_SUCCESS;
         if (mResolvedSyncMode == BufferSyncMode::ZeroCopy)
         {
-            err = clSetKernelArgSVMPointer(kernel->GetCLKernel(), argIndex, mpSVM);
+            err = clSetKernelArgSVMPointer(_kernel->GetCLKernel(), argIndex, mpSVM);
         }
         else
         {
-            err = clSetKernelArg(kernel->GetCLKernel(), argIndex, sizeof(cl_mem), &mpMemObject);
+            err = clSetKernelArg(_kernel->GetCLKernel(), argIndex, sizeof(cl_mem), &mpMemObject);
         }
 
         if (err != CL_SUCCESS)
         {
-            kernel->mIsValid = false;
+            _kernel->mIsValid = false;
 
             UE_LOG(LogTemp, Warning, TEXT("Failed To Attach Buffer To Kernel: %s"), *FString(GetErrorString(err).c_str()));
             return false;
@@ -168,13 +168,13 @@ struct AsyncMappedTransferState
         return true;
     }
 
-    bool Buffer::Upload(IQueue& queueBase,
+    bool Buffer::Upload(IQueue& queue,
                         const void* src,
                         size_t bytes,
                         size_t offset)
     {
-        OpenCL::Queue* queue = reinterpret_cast<OpenCL::Queue*>(&queueBase);
-        if (!queue || !src || offset + bytes > mDescription.SizeBytes)
+        OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
+        if (!_queue || !src || offset + bytes > mDescription.SizeBytes)
         {
             return false;
         }
@@ -188,7 +188,7 @@ struct AsyncMappedTransferState
             case BufferSyncMode::Stream:
             {
                 cl_int err = CL_SUCCESS;
-                void* hostPtr = clEnqueueMapBuffer(queue->GetCLQueue(),
+                void* hostPtr = clEnqueueMapBuffer(_queue->GetCLQueue(),
                                                    mpMemObject,
                                                    CL_TRUE,
                                                    CL_MAP_WRITE,
@@ -206,7 +206,7 @@ struct AsyncMappedTransferState
 
                 std::memcpy(static_cast<uint8_t*>(hostPtr) + offset, src, bytes);
 
-                return clEnqueueUnmapMemObject(queue->GetCLQueue(),
+                return clEnqueueUnmapMemObject(_queue->GetCLQueue(),
                                                mpMemObject,
                                                hostPtr,
                                                0,
@@ -220,7 +220,7 @@ struct AsyncMappedTransferState
                     return false;
                 }
 
-                if (clEnqueueSVMMap(queue->GetCLQueue(),
+                if (clEnqueueSVMMap(_queue->GetCLQueue(),
                                     CL_TRUE,
                                     CL_MAP_WRITE,
                                     mpSVM,
@@ -234,7 +234,7 @@ struct AsyncMappedTransferState
 
                 std::memcpy(static_cast<uint8_t*>(mpSVM) + offset, src, bytes);
 
-                return clEnqueueSVMUnmap(queue->GetCLQueue(),
+                return clEnqueueSVMUnmap(_queue->GetCLQueue(),
                                          mpSVM,
                                          0,
                                          nullptr,
@@ -247,13 +247,13 @@ struct AsyncMappedTransferState
         }
     }
 
-    bool Buffer::Download(IQueue& queueBase,
+    bool Buffer::Download(IQueue& queue,
                           void* dst,
                           size_t bytes,
                           size_t offset)
     {
-        OpenCL::Queue* queue = reinterpret_cast<OpenCL::Queue*>(&queueBase);
-        if (!queue || !mpMemObject || !dst || offset + bytes > mDescription.SizeBytes)
+        OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
+        if (!_queue || !mpMemObject || !dst || offset + bytes > mDescription.SizeBytes)
         {
             return false;
         }
@@ -262,7 +262,7 @@ struct AsyncMappedTransferState
         {
             case BufferSyncMode::CopyOnce:
             {
-                return clEnqueueReadBuffer(queue->GetCLQueue(),
+                return clEnqueueReadBuffer(_queue->GetCLQueue(),
                                            mpMemObject,
                                            CL_TRUE,
                                            offset,
@@ -275,7 +275,7 @@ struct AsyncMappedTransferState
             case BufferSyncMode::Stream:
             {
                 cl_int err = CL_SUCCESS;
-                void* hostPtr = clEnqueueMapBuffer(queue->GetCLQueue(),
+                void* hostPtr = clEnqueueMapBuffer(_queue->GetCLQueue(),
                                                    mpMemObject,
                                                    CL_TRUE,
                                                    CL_MAP_READ,
@@ -293,7 +293,7 @@ struct AsyncMappedTransferState
 
                 std::memcpy(dst, static_cast<uint8_t*>(hostPtr) + offset, bytes);
 
-                return clEnqueueUnmapMemObject(queue->GetCLQueue(),
+                return clEnqueueUnmapMemObject(_queue->GetCLQueue(),
                                                mpMemObject,
                                                hostPtr,
                                                0,
@@ -307,7 +307,7 @@ struct AsyncMappedTransferState
                     return false;
                 }
 
-                if (clEnqueueSVMMap(queue->GetCLQueue(),
+                if (clEnqueueSVMMap(_queue->GetCLQueue(),
                                     CL_TRUE,
                                     CL_MAP_READ,
                                     mpSVM,
@@ -321,7 +321,7 @@ struct AsyncMappedTransferState
 
                 std::memcpy(dst, static_cast<uint8_t*>(mpSVM) + offset, bytes);
 
-                return clEnqueueSVMUnmap(queue->GetCLQueue(),
+                return clEnqueueSVMUnmap(_queue->GetCLQueue(),
                                          mpSVM,
                                          0,
                                          nullptr,
@@ -334,13 +334,13 @@ struct AsyncMappedTransferState
         }
     }
 
-	std::shared_ptr<IEvent> Buffer::UploadAsync(IQueue& queueBase,
+	std::shared_ptr<IEvent> Buffer::UploadAsync(IQueue& queue,
                                                 const void* src,
                                                 size_t bytes,
                                                 size_t offset)
 	{
-        OpenCL::Queue* queue = reinterpret_cast<OpenCL::Queue*>(&queueBase);
-        if (!queue || !src || offset + bytes > mDescription.SizeBytes)
+        OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
+        if (!_queue || !src || offset + bytes > mDescription.SizeBytes)
         {
             return nullptr;
         }
@@ -356,7 +356,7 @@ struct AsyncMappedTransferState
             case BufferSyncMode::Stream:
             {
                 cl_int Err = CL_SUCCESS;
-                void* HostPtr = clEnqueueMapBuffer(queue->GetCLQueue(),
+                void* HostPtr = clEnqueueMapBuffer(_queue->GetCLQueue(),
                                                    mpMemObject,
                                                    CL_FALSE,
                                                    CL_MAP_WRITE,
@@ -379,7 +379,7 @@ struct AsyncMappedTransferState
                 auto Completion = std::make_shared<Event>();
                 auto* State = new AsyncMappedTransferState();
                 State->mpCompletionEvent = Completion;
-                State->mpQueue = queue->shared_from_this();
+                State->mpQueue = _queue->shared_from_this();
                 State->mpMemObject = mpMemObject;
                 State->mpMappedPtr = HostPtr;
                 State->mBytes = bytes;
@@ -405,7 +405,7 @@ struct AsyncMappedTransferState
                     return nullptr;
                 }
 
-                const cl_int Err = clEnqueueSVMMap(queue->GetCLQueue(),
+                const cl_int Err = clEnqueueSVMMap(_queue->GetCLQueue(),
                                                    CL_FALSE,
                                                    CL_MAP_WRITE,
                                                    mpSVM,
@@ -426,7 +426,7 @@ struct AsyncMappedTransferState
                 auto Completion = std::make_shared<Event>();
                 auto* State = new AsyncMappedTransferState();
                 State->mpCompletionEvent = Completion;
-                State->mpQueue = queue->shared_from_this();
+                State->mpQueue = _queue->shared_from_this();
                 State->mpSVMPtr = mpSVM;
                 State->mBytes = bytes;
                 State->mOffset = offset;
@@ -451,13 +451,13 @@ struct AsyncMappedTransferState
         }
 	}
 
-	std::shared_ptr<IEvent> Buffer::DownloadAsync(IQueue& queueBase,
+	std::shared_ptr<IEvent> Buffer::DownloadAsync(IQueue& queue,
                                                   void* dst,
                                                   size_t bytes,
                                                   size_t offset)
 	{
-        OpenCL::Queue* queue = reinterpret_cast<OpenCL::Queue*>(&queueBase);
-        if (!queue || !dst || offset + bytes > mDescription.SizeBytes)
+        OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
+        if (!_queue || !dst || offset + bytes > mDescription.SizeBytes)
         {
             return nullptr;
         }
@@ -468,7 +468,7 @@ struct AsyncMappedTransferState
         {
             case BufferSyncMode::CopyOnce:
             {
-                const cl_int err = clEnqueueReadBuffer(queue->GetCLQueue(),
+                const cl_int err = clEnqueueReadBuffer(_queue->GetCLQueue(),
                                                        mpMemObject,
                                                        CL_FALSE,
                                                        offset,
@@ -487,7 +487,7 @@ struct AsyncMappedTransferState
             case BufferSyncMode::Stream:
             {
                 cl_int Err = CL_SUCCESS;
-                void* HostPtr = clEnqueueMapBuffer(queue->GetCLQueue(),
+                void* HostPtr = clEnqueueMapBuffer(_queue->GetCLQueue(),
                                                    mpMemObject,
                                                    CL_FALSE,
                                                    CL_MAP_READ,
@@ -510,7 +510,7 @@ struct AsyncMappedTransferState
                 auto Completion = std::make_shared<Event>(ev);
                 auto* State = new AsyncMappedTransferState();
                 State->mpCompletionEvent = Completion;
-				State->mpQueue = queue->shared_from_this();
+				State->mpQueue = _queue->shared_from_this();
                 State->mpMemObject = mpMemObject;
                 State->mpMappedPtr = HostPtr;
                 State->mpDownloadDest = dst;
@@ -533,7 +533,7 @@ struct AsyncMappedTransferState
                     return nullptr;
                 }
 
-                const cl_int Err = clEnqueueSVMMap(queue->GetCLQueue(),
+                const cl_int Err = clEnqueueSVMMap(_queue->GetCLQueue(),
                                                    CL_FALSE,
                                                    CL_MAP_READ,
                                                    mpSVM,
@@ -556,7 +556,7 @@ struct AsyncMappedTransferState
 
                 auto* State = new AsyncMappedTransferState();
                 State->mpCompletionEvent = Completion;
-                State->mpQueue = queue->shared_from_this();
+                State->mpQueue = _queue->shared_from_this();
                 State->mpSVMPtr = mpSVM;
                 State->mpDownloadDest = dst;
                 State->mBytes = bytes;
