@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 
 #include "Toolkits/AssetEditorToolkit.h"
-#include "Widgets/SShaderEditorWidget.h"
 
 class UGPUProgramAsset;
+class SGPUProgramEditorWidget;
 
 class FGPUProgramAssetEditorToolkit : public FAssetEditorToolkit
 {
@@ -40,7 +40,7 @@ public:
 private:
 	TSharedRef<SDockTab> SpawnEditorTab(const FSpawnTabArgs& Args);
 private:
-	TSharedPtr<SShaderEditorWidget> mpShaderEditor;
+	TSharedPtr<SGPUProgramEditorWidget> mpShaderEditor;
 
 	TObjectPtr<UGPUProgramAsset> mpProgramAsset;
 };

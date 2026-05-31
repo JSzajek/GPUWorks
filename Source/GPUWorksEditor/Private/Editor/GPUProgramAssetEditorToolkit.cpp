@@ -1,7 +1,8 @@
 #include "GPUProgramAssetEditorToolkit.h"
 
-#include "Widgets/Input/SMultiLineEditableTextBox.h"
 #include "Widgets/Docking/SDockTab.h"
+#include "Widgets/GPUProgramEditorWidget.h"
+
 #include "Framework/Docking/TabManager.h"
 
 #include "GPUWorksLib.h"
@@ -38,6 +39,6 @@ TSharedRef<SDockTab> FGPUProgramAssetEditorToolkit::SpawnEditorTab(const FSpawnT
 {
 	return SNew(SDockTab).Label(NSLOCTEXT("GPUWorks", "ShaderSourceTab", "GPU Source"))
 		   [
-			   SNew(SShaderEditorWidget).ProgramAsset(mpProgramAsset)
+			   SNew(SGPUProgramEditorWidget).ProgramAsset(mpProgramAsset)
 		   ];
 }

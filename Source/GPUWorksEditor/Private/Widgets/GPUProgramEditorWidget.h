@@ -1,25 +1,30 @@
 #pragma once
 
-#include "Widgets/Text/STextBlock.h"
-#include "Widgets/SLineNumberBox.h"
-#include "Widgets/Input/STextComboBox.h"
-#include "Widgets/Input/SMultiLineEditableTextBox.h"
-#include "Widgets/Layout/SScrollBar.h"
+#include "Widgets/SCompoundWidget.h"
 
-#include "GPUWorksLib.h"
+#include "Interops/UE/GPUContextObject.h"
+
+class STextComboBox;
+class STextBlock;
+class SMultiLineEditableTextBox;
+class SLineNumberBox;
+class SScrollBar;
 
 class UGPUProgramAsset;
 
-class SShaderEditorWidget : public SCompoundWidget
+class SGPUProgramEditorWidget : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SShaderEditorWidget) {}
+	SLATE_BEGIN_ARGS(SGPUProgramEditorWidget) {}
 		SLATE_ARGUMENT(TWeakObjectPtr<UGPUProgramAsset>, ProgramAsset)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
 private:
 	FReply OnCompileClicked();
+
+	void CompileProgram();
+
 	void OnSourceChanged(const FText& NewText);
 	void OnProgramLanguageChanged(TSharedPtr<FString> newSelection,
 								  ESelectInfo::Type selectInfo);
@@ -31,6 +36,9 @@ private:
 
 	void SetCompileResult(bool success,
 						  const FString& message);
+
+	void SetDirty(bool isDirty);
+
 	EGPUBackend GetSelectedBackend() const;
 private:
 	TWeakObjectPtr<UGPUProgramAsset> mpProgramAsset;
@@ -38,10 +46,15 @@ private:
 	TArray<TSharedPtr<FString>> mProgramLanguageOptions;
 	TSharedPtr<STextComboBox> mpProgramLanguageComboBox;
 
-	TSharedPtr<SMultiLineEditableTextBox> mpSourceEditor;
+	bool bDirty = false;
+	bool bIsCompiling = false;
+
+	TSharedPtr<SButton> mpCompileButton;
 	TSharedPtr<STextBlock> mpStatusText;
-	TSharedPtr<SMultiLineEditableTextBox> mpLogOutput;
-	TSharedPtr<SLineNumberBox> mpLineNumberDisplay;
 
 	TSharedPtr<SScrollBar> mpEditorVScrollBar;
+	TSharedPtr<SMultiLineEditableTextBox> mpSourceEditor;
+	TSharedPtr<SLineNumberBox> mpLineNumberDisplay;
+
+	TSharedPtr<SMultiLineEditableTextBox> mpLogOutput;
 };
