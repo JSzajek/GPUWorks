@@ -28,6 +28,10 @@ public:
     UFUNCTION(BlueprintCallable, Category="GPU")
     int64 GetSizeBytes() const;
 
+    UFUNCTION(BlueprintCallable, Category="GPU")
+    void CopyBuffer(UGPUContextObject* contextObject,
+                    UGPUBufferObject* otherBuffer);
+
     bool UploadRaw(UGPUContextObject* contextObject,
                    const void* bytes,
                    int64 sizeBytes,

@@ -106,15 +106,6 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(1) Kernel Compilation - String", [this]()
 		{
-		#if 0
-			OpenCL::ContextPtr context = MakeContext(mpDefaultDevice);
-
-			const std::string moduleDirStr = std::string(TCHAR_TO_UTF8(*ModuleDirectory));
-			OpenCL::Program program(context, mpDefaultDevice);
-			program.ReadFromString("__kernel void test() { }");
-
-			TestTrue(TEXT("Invalid Program!"), program.Get() != nullptr);
-		#endif
 			std::string buildLog;
 			std::shared_ptr<Gpu::IProgram> program = mpContext->CreateProgramFromSource("__kernel void test() { }", 
 																						&buildLog);
@@ -125,15 +116,6 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(2) Kernel Compilation - File", [this]()
 		{
-		#if 0
-			OpenCL::ContextPtr context = MakeContext(mpDefaultDevice);
-
-			const std::string moduleDirStr = std::string(TCHAR_TO_UTF8(*ModuleDirectory));
-			OpenCL::Program program(context, mpDefaultDevice);
-			program.ReadFromFile(moduleDirStr + "/UnitTest/Shaders/add_vectors.cl");
-
-			TestTrue(TEXT("Invalid Program!"), program.Get() != nullptr);
-		#endif
 			const std::string moduleDirStr = std::string(TCHAR_TO_UTF8(*ModuleDirectory));
 
 			std::string buildLog;
@@ -146,21 +128,6 @@ void FGPUUnitTestsSpecs::Define()
 		
 		It("(3) Kernel Failure", [this]()
 		{
-		#if 0
-			OpenCL::ContextPtr context = MakeContext(mpDefaultDevice);
-
-			OpenCL::Program program(context, mpDefaultDevice);
-			program.ReadFromString("__kernel void test() { }");
-
-			if (!TestTrue(TEXT("Invalid Program!"), program.Get() != nullptr))
-				return;
-
-			AddExpectedErrorPlain(TEXT("Couldn't Create A Kernel"));
-
-			OpenCL::Kernel kernel(program, "foo");
-
-			TestFalse(TEXT("Kernel Should Fail to Find Invalid Function"), kernel.IsValid());
-		#endif
 			std::shared_ptr<Gpu::IProgram> program = mpContext->CreateProgramFromSource("__kernel void test() { }");
 			TestTrue(TEXT("Invalid Program"), program != nullptr);
 
@@ -170,29 +137,6 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(4) Argument Setting", [this]()
 		{
-		#if 0
-			OpenCL::ContextPtr context = MakeContext(mpDefaultDevice);
-
-			OpenCL::Program program(context, mpDefaultDevice);
-			program.ReadFromString("__kernel void test(float a, float b) { }");
-
-			if (!TestTrue(TEXT("Invalid Program!"), program.Get() != nullptr))
-				return;
-
-			OpenCL::Kernel kernel(program, "test");
-
-			if (!TestTrue(TEXT("Invalid Kernel!"), kernel.IsValid()))
-				return;
-
-			kernel.SetArgument(0, 2.0f);
-
-			if (!TestTrue(TEXT("Failed to Set First Kernel Argument Program!"), kernel.IsValid()))
-				return;
-
-			kernel.SetArgument(1, 11.0f);
-
-			TestTrue(TEXT("Failed to Set Second Kernel Argument Program!"), kernel.IsValid());
-		#endif
 			std::shared_ptr<Gpu::IProgram> program = mpContext->CreateProgramFromSource("__kernel void test(float a, float b) { }");
 			TestTrue(TEXT("Invalid Program"), program != nullptr);
 
@@ -208,26 +152,6 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(5) Invalid Argument", [this]()
 		{
-		#if 0
-			OpenCL::ContextPtr context = MakeContext(mpDefaultDevice);
-
-			OpenCL::Program program(context, mpDefaultDevice);
-			program.ReadFromString("__kernel void test(float a) { }");
-
-			if (!TestTrue(TEXT("Invalid Program!"), program.Get() != nullptr))
-				return;
-
-			OpenCL::Kernel kernel(program, "test");
-			if (!TestTrue(TEXT("Invalid Kernel!"), kernel.IsValid()))
-				return;
-
-			AddExpectedErrorPlain(TEXT("Couldn't Create Kernel Argument!"));
-
-			kernel.SetArgument(3, 9.0f);
-
-			TestFalse(TEXT("Set Invalid Kernel Argument!"), kernel.IsValid());
-		#endif
-
 			const std::string moduleDirStr = std::string(TCHAR_TO_UTF8(*ModuleDirectory));
 
 			std::shared_ptr<Gpu::IProgram> program = mpContext->CreateProgramFromSource("__kernel void test(float a) { }");
@@ -263,26 +187,6 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(1) Buffer Creation", [this]()
 		{
-		#if 0
-			OpenCL::ContextPtr context = MakeContext(mpDefaultDevice);
-
-			size_t count = 10;
-			std::vector<float> test_input(count, 0.0f);
-			std::vector<float> test_inout(count, 0.0f);
-
-
-			OpenCL::Buffer buffer_output(mpDefaultDevice, context, test_input.data(), count * sizeof(float), OpenCL::AccessType::WRITE_ONLY, OpenCL::MemoryStrategy::COPY_ONCE);
-			if (!TestTrue(TEXT("Failed Write-Only Buffer Creation!"), buffer_output.IsValid()))
-				return;
-
-			OpenCL::Buffer buffer_input(mpDefaultDevice, context, nullptr, count * sizeof(float), OpenCL::AccessType::READ_ONLY, OpenCL::MemoryStrategy::STREAM);
-			if (!TestTrue(TEXT("Failed Read-Only Buffer Creation!"), buffer_input.IsValid()))
-				return;
-
-			OpenCL::Buffer buffer_inout(mpDefaultDevice, context, test_inout.data(), count * sizeof(float), OpenCL::AccessType::READ_WRITE, OpenCL::MemoryStrategy::STREAM);
-			TestTrue(TEXT("Failed Read-Write Buffer Creation!"), buffer_inout.IsValid());
-		#endif
-
 			size_t count = 10;
 			std::vector<float> test_input(count, 0.0f);
 			std::vector<float> test_inout(count, 0.0f);
@@ -313,28 +217,6 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(2) Buffer Read", [this]()
 		{
-		#if 0
-			OpenCL::ContextPtr context = MakeContext(mpDefaultDevice);
-
-			size_t count = 5;
-			std::vector<float> input_data = { 30, 2, 45, 19, 54 };
-
-			OpenCL::Buffer buffer_input(mpDefaultDevice, context, input_data.data(), count * sizeof(float), OpenCL::AccessType::READ_WRITE, OpenCL::MemoryStrategy::STREAM);
-			if (!TestTrue(TEXT("Failed Read-Only Buffer Creation!"), buffer_input.IsValid()))
-				return;
-
-			std::vector<float> target_output(count, 0.0f);
-
-			OpenCL::CommandQueue queue(context, mpDefaultDevice);
-			buffer_input.Fetch(queue, target_output.data(), count * sizeof(float));
-
-			for (size_t i = 0; i < count; ++i)
-			{
-				std::string msg = (std::to_string(target_output[i]) + " != " + std::to_string(input_data[i]));
-				if (!TestTrue(FString(msg.c_str()), target_output[i] == input_data[i]))
-					return;
-			}
-		#endif
 			size_t count = 5;
 			std::vector<float> input_data = { 30, 2, 45, 19, 54 };
 
@@ -363,42 +245,6 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(3) Buffer Read & Write", [this]()
 		{
-		#if 0
-			OpenCL::ContextPtr context = MakeContext(mpDefaultDevice);
-
-			OpenCL::Program program(context, mpDefaultDevice);
-			program.ReadFromString("__kernel void double_data(__global float* data)\n" 
-								   "{ int i = get_global_id(0); \n"
-								   "data[i] = data[i] * 2; }");
-
-			if (!TestTrue(TEXT("Invalid Program!"), program.Get() != nullptr))
-				return;
-
-			size_t count = 5;
-			std::vector<float> input_data = { 30, 2, 45, 19, 54 };
-			std::vector<float> target_output = { 60, 4, 90, 38, 108 };
-
-			OpenCL::Buffer buffer_input(mpDefaultDevice, context, input_data.data(), count * sizeof(float), OpenCL::AccessType::READ_WRITE, OpenCL::MemoryStrategy::STREAM);
-			if (!TestTrue(TEXT("Failed Read-Write Buffer Creation!"), buffer_input.IsValid()))
-				return;
-
-			OpenCL::Kernel kernel(program, "double_data");
-			OpenCL::CommandQueue queue(context, mpDefaultDevice);
-
-			kernel.SetArgument<OpenCL::Buffer>(0, buffer_input);
-
-			queue.EnqueueRange(kernel, 1, &count);
-
-			std::vector<float> output_data(count, 0.0f);
-			buffer_input.Fetch(queue, output_data.data(), count * sizeof(float));
-
-			for (size_t i = 0; i < count; ++i)
-			{
-				std::string msg = (std::to_string(target_output[i]) + " != " + std::to_string(output_data[i]));
-				if (!TestTrue(FString(msg.c_str()), target_output[i] == output_data[i]))
-					return;
-			}
-		#endif
 			size_t count = 5;
 			std::vector<float> input_data = { 30, 2, 45, 19, 54 };
 			std::vector<float> target_output = { 60, 4, 90, 38, 108 };
@@ -445,42 +291,6 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(4) Zero Copy Buffers", [this]()
 		{
-		#if 0
-			OpenCL::ContextPtr context = MakeContext(mpDefaultDevice);
-
-			OpenCL::Program program(context, mpDefaultDevice);
-			program.ReadFromString("__kernel void half_data(__global float* data)\n" 
-								   "{ int i = get_global_id(0); \n"
-								   "data[i] = data[i] * 0.5f; }");
-
-			if (!TestTrue(TEXT("Invalid Program!"), program.Get() != nullptr))
-				return;
-
-			size_t count = 5;
-			std::vector<float> input_data = { 30, 2, 45, 19, 54 };
-			std::vector<float> target_output = { 15, 1, 22.5, 9.5, 27 };
-
-			OpenCL::Buffer buffer_input(mpDefaultDevice, context, input_data.data(), count * sizeof(float), OpenCL::AccessType::READ_WRITE, OpenCL::MemoryStrategy::ZERO_COPY);
-			if (!TestTrue(TEXT("Failed Read-Write Buffer Creation!"), buffer_input.IsValid()))
-				return;
-
-			OpenCL::Kernel kernel(program, "half_data");
-			OpenCL::CommandQueue queue(context, mpDefaultDevice);
-
-			kernel.SetArgument<OpenCL::Buffer>(0, buffer_input);
-
-			queue.EnqueueRange(kernel, 1, &count);
-
-			std::vector<float> output_data(count, 0.0f);
-			buffer_input.Fetch(queue, output_data.data(), count * sizeof(float));
-
-			for (size_t i = 0; i < count; ++i)
-			{
-				std::string msg = (std::to_string(target_output[i]) + " != " + std::to_string(output_data[i]));
-				if (!TestTrue(FString(msg.c_str()), target_output[i] == output_data[i]))
-					return;
-			}
-		#endif
 			size_t count = 5;
 			std::vector<float> input_data = { 30, 2, 45, 19, 54 };
 			std::vector<float> target_output = { 15, 1, 22.5, 9.5, 27 };
@@ -552,32 +362,6 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(1) Enqueue", [this]()
 		{
-		#if 0
-			OpenCL::ContextPtr context = MakeContext(mpDefaultDevice);
-
-			OpenCL::Program program(context, mpDefaultDevice);
-			program.ReadFromString("__kernel void test(__global float* data) { }");
-
-			if (!TestTrue(TEXT("Invalid Program!"), program.Get() != nullptr))
-				return;
-
-			size_t count = 5;
-			std::vector<float> input_data(count, 3.0f);
-
-			OpenCL::Buffer buffer_input(mpDefaultDevice, context, input_data.data(), count * sizeof(float), OpenCL::AccessType::READ_WRITE, OpenCL::MemoryStrategy::STREAM);
-			if (!TestNotNull(TEXT("Failed Read-Write Buffer Creation!"), buffer_input.Get()))
-				return;
-
-			OpenCL::Kernel kernel(program, "test");
-			OpenCL::CommandQueue queue(context, mpDefaultDevice);
-
-			kernel.SetArgument<OpenCL::Buffer>(0, buffer_input);
-			if (!TestTrue(TEXT("Couldn't Set Kernel Arguments!"), kernel.IsValid()))
-				return;
-
-			queue.EnqueueRange(kernel, 1, &count);
-			TestTrue(TEXT("Couldn't Enqueue the Queue!"), queue.IsValid());
-		#endif
 			size_t count = 5;
 			std::vector<float> input_data(count, 3.0f);
 
@@ -616,76 +400,6 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(2) Work Sizes", [this]()
 		{
-		#if 0
-			OpenCL::ContextPtr context = MakeContext(mpDefaultDevice);
-
-			OpenCL::Program program(context, mpDefaultDevice);
-			program.ReadFromString("__kernel void triple_data(__global const float* data, __global float* result)\n" 
-								   "{ int i = get_global_id(0); \n"
-								   "result[i] = data[i] * 3; }");
-
-			if (!TestTrue(TEXT("Invalid Program!"), program.Get() != nullptr))
-				return;
-
-			size_t count = 5;
-			std::vector<float> input_data = { 30, 2, 45, 19, 54 };
-
-			OpenCL::Buffer buffer_input(mpDefaultDevice, context, input_data.data(), count * sizeof(float), OpenCL::AccessType::WRITE_ONLY, OpenCL::MemoryStrategy::COPY_ONCE);
-			OpenCL::Buffer buffer_output(mpDefaultDevice, context, nullptr, count * sizeof(float), OpenCL::AccessType::READ_ONLY, OpenCL::MemoryStrategy::STREAM);
-			if (!TestNotNull(TEXT("Failed Read-Write Buffer Creation!"), buffer_input.Get()))
-				return;
-
-			OpenCL::Kernel kernel(program, "triple_data");
-			OpenCL::CommandQueue queue(context, mpDefaultDevice);
-
-			kernel.SetArgument<OpenCL::Buffer>(0, buffer_input);
-			kernel.SetArgument<OpenCL::Buffer>(1, buffer_output);
-
-			// Partial Range --------------------------------------------------
-			size_t range = 2;
-			queue.EnqueueRange(kernel, 1, &range);
-			if (!TestTrue(TEXT("Couldn't Enqueue the Queue!"), queue.IsValid()))
-				return;
-
-			std::vector<float> part_target_output = { 90, 6, 45, 19, 54 };
-
-			std::vector<float> part_output_data(count, 0.0f);
-			buffer_output.Fetch(queue, part_output_data.data(), range * sizeof(float));
-
-			for (size_t i = 0; i < count; ++i)
-			{
-				if (i < range)
-				{
-					std::string msg = (std::to_string(part_target_output[i]) + " != " + std::to_string(part_output_data[i]));
-					if (!TestTrue(FString(msg.c_str()), part_target_output[i] == part_output_data[i]))
-						return;
-				}
-				else
-				{
-					if (!TestTrue("Values != 0", part_output_data[i] == 0))
-						return;
-				}
-			}
-			// ----------------------------------------------------------------
-
-			// Full Range -----------------------------------------------------
-			queue.EnqueueRange(kernel, 1, &count);
-			if (!TestTrue(TEXT("Couldn't Enqueue the Queue!"), queue.IsValid()))
-				return;
-
-			std::vector<float> full_target_output = { 90, 6, 135, 57, 162 };
-
-			std::vector<float> full_output_data(count, 0.0f);
-			buffer_output.Fetch(queue, full_output_data.data(), count * sizeof(float));
-
-			for (size_t i = 0; i < count; ++i)
-			{
-				std::string msg = (std::to_string(full_target_output[i]) + " != " + std::to_string(full_output_data[i]));
-				if (!TestTrue(FString(msg.c_str()), full_target_output[i] == full_output_data[i]))
-					return;
-			}
-			// ----------------------------------------------------------------
-		#endif
 			size_t count = 5;
 			std::vector<float> input_data = { 30, 2, 45, 19, 54 };
 
@@ -1294,6 +1008,72 @@ void FGPUUnitTestsSpecs::Define()
 
 			utexture->ConditionalBeginDestroy();
 			tempWorld.Reset();
+		});
+
+		LatentIt("(9) GPUImageObject 2D Async Update", EAsyncExecution::ThreadPool, FTimespan(0, 0, 20), [this](const FDoneDelegate& Done)
+		{
+			UGPUImageObject* image = nullptr;
+			UTexture2D* utexture = nullptr;
+			FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([&image, &utexture, this]()
+			{
+				const EGpuPixelFormat format = EGpuPixelFormat::RGBA8;
+
+				image = NewObject<UGPUImageObject>();
+				image->AddToRoot();
+				image->CreateImage2D(mpGPUContextObj,
+									 mDefaultUTextureWidth,
+									 mDefaultUTextureHeight,
+									 format);
+
+				if (!TestNotNull(FString::Printf(TEXT("Failed to Create UGPUImageObject: %s"), *UEnum::GetValueAsString(format)), image))
+				{
+					return;
+				}
+
+				if (!TestTrue(FString::Printf(TEXT("Failed To Create Context for: %s"), *UEnum::GetValueAsString(format)), image->IsValidImage()))
+				{
+					image->RemoveFromRoot();
+					image->ConditionalBeginDestroy();
+					return;
+				}
+
+				utexture = image->CreateTexture2D(mpGPUContextObj, true);
+				utexture->AddToRoot();
+				if (!TestNotNull(FString::Printf(TEXT("Failed to Create UTexture2D for: %s"), *UEnum::GetValueAsString(format)), utexture))
+				{
+					image->RemoveFromRoot();
+					image->ConditionalBeginDestroy();
+					return;
+				}
+			}, TStatId(), nullptr, ENamedThreads::GameThread);
+			Task->Wait();
+
+			bool fillSuccess = image->FillColor(mpGPUContextObj, FColor::Blue);
+			if (!TestTrue(TEXT("Failed to Fill Color"), fillSuccess))
+			{
+				image->RemoveFromRoot();
+				image->ConditionalBeginDestroy();
+				return;
+			}
+
+			image->UpdateTexture2DAsync(mpGPUContextObj, utexture, [image, utexture, Done, this](bool success)
+			{
+				check(IsInGameThread());
+
+				if (!TestTrue(TEXT("Failed Async Update"), success))
+				{
+					Done.Execute();
+					return;
+				}
+
+				// TODO:: Add Pixel Reading Check.
+
+				image->RemoveFromRoot();
+				image->ConditionalBeginDestroy();
+				utexture->RemoveFromRoot();
+				utexture->ConditionalBeginDestroy();
+				Done.Execute();
+			}, ENamedThreads::GameThread);
 		});
 	});
 }

@@ -64,6 +64,9 @@ namespace Gpu::OpenCL
                                                       void* dst,
                                                       size_t bytes,
                                                       size_t offset = 0) override;
+
+        virtual bool Copy(IQueue& queue,
+                          IBuffer& buffer) override;
     private:
         enum class ResolvedMemoryModel : uint8_t
         {

@@ -7,11 +7,10 @@
 #include "Engine/VolumeTexture.h"
 #include "Engine/TextureRenderTarget2D.h"
 
-#include "GPU/GPUContext.h"
-#include "GPU/GPUImage.h"
-#include "GPU/GPUQueue.h"
-
 #include "Render/UTextureUtils.h"
+
+#include "GPU/GPUTypes.h"
+#include "GPU/GPUImage.h"
 
 #include "GPUImageObject.generated.h"
 
@@ -100,6 +99,10 @@ public:
                        TArray<uint8>& OutBytes);
 
     UFUNCTION(BlueprintCallable, Category="GPU|Image")
+    bool FillColor(UGPUContextObject* ContextObject,
+                   const FColor& color);
+
+    UFUNCTION(BlueprintCallable, Category="GPU|Image")
     UTexture2D* CreateTexture2D(UGPUContextObject* ContextObject,
                                 bool bSRGB = false,
                                 bool bGenerateMips = false);
@@ -128,6 +131,11 @@ public:
     bool UpdateTexture2D(UGPUContextObject* ContextObject,
                          UTexture2D* Texture);
 
+    bool UpdateTexture2DAsync(UGPUContextObject* ContextObject,
+                              UTexture2D* Texture,
+                              const std::function<void(bool)>& CompletionCallback,
+                              ENamedThreads::Type CallbackThread = ENamedThreads::GameThread);
+
     UFUNCTION(BlueprintCallable, Category="GPU|Image")
     bool UpdateTexture2DArray(UGPUContextObject* ContextObject,
                               UTexture2DArray* Texture);
@@ -138,20 +146,20 @@ public:
 
     std::shared_ptr<Gpu::IImage> GetImage() const { return Image; }
 private:
-    static Gpu::PixelFormat ToNativePixelFormat(EGpuPixelFormat Format);
+    Gpu::PixelFormat ToNativePixelFormat(EGpuPixelFormat Format) const;
 
-    static EGpuPixelFormat FromNativePixelFormat(Gpu::PixelFormat Format);
+    EGpuPixelFormat FromNativePixelFormat(Gpu::PixelFormat Format) const;
 
-    static EGpuImageType FromNativeImageType(Gpu::ImageType Type);
+    EGpuImageType FromNativeImageType(Gpu::ImageType Type) const;
 
-    static EPixelFormat ToUEPixelFormat(Gpu::PixelFormat Format);
-    static ETextureRenderTargetFormat ToUERenderTargetPixelFormat(Gpu::PixelFormat Format);
+    EPixelFormat ToUEPixelFormat(Gpu::PixelFormat Format) const;
+    ETextureRenderTargetFormat ToUERenderTargetPixelFormat(Gpu::PixelFormat Format) const;
 
-    static size_t GetBytesPerPixel(Gpu::PixelFormat Format);
+    size_t GetBytesPerPixel(Gpu::PixelFormat Format) const;
 
     bool ValidateContextAndQueue(UGPUContextObject* ContextObject) const;
 
-    uint32 GetChannelCount(Gpu::PixelFormat Format);
+    uint32 GetChannelCount(Gpu::PixelFormat Format) const;
 
     bool GenerateMipChain(Gpu::PixelFormat Format,
                           uint8_t* SourceBytes,
@@ -181,6 +189,10 @@ private:
     bool UpdateTexture_Internal(FTexturePlatformData* PlatformData,
                                 UGPUContextObject* ContextObject,
 								bool bGenerateMips);
+
+    bool UpdateTexture2DAsync_Internal(FTexturePlatformData* PlatformData,
+                                       UGPUContextObject* ContextObject,
+								       bool bGenerateMips);
 private:
     std::shared_ptr<Gpu::IImage> Image;
 };

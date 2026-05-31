@@ -42,6 +42,18 @@ int64 UGPUBufferObject::GetSizeBytes() const
     return Buffer ? static_cast<int64>(Buffer->GetSize()) : 0;
 }
 
+void UGPUBufferObject::CopyBuffer(UGPUContextObject* contextObject,
+                                  UGPUBufferObject* otherBuffer)
+{
+    if (!Buffer || !contextObject || !contextObject->GetDefaultQueue())
+    {
+        return;
+    }
+
+    Buffer->Copy(*contextObject->GetDefaultQueue(),
+                 *otherBuffer->GetBuffer());
+}
+
 bool UGPUBufferObject::UploadRaw(UGPUContextObject* contextObject,
                                  const void* bytes,
                                  int64 sizeBytes,

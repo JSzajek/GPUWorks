@@ -167,12 +167,14 @@ namespace Gpu::OpenCL
         OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
         if (!_queue || !ImageObject || !srcData)
         {
+            Gpu::OpenCL::LogCLError("Failed to Upload Async", CL_INVALID_VALUE);
             return nullptr;
         }
 
         const size_t RequiredBytes = GetRequiredBytes(region, layout);
         if (RequiredBytes == 0 || srcBytes < RequiredBytes)
         {
+            Gpu::OpenCL::LogCLError("Failed to Upload Async", CL_INVALID_VALUE);
             return nullptr;
         }
 
@@ -212,6 +214,7 @@ namespace Gpu::OpenCL
 
         if (err != CL_SUCCESS || !WriteEvent)
         {
+            Gpu::OpenCL::LogCLError("Failed to Enqueue Write Image", err);
             delete State;
             return nullptr;
         }
@@ -223,6 +226,7 @@ namespace Gpu::OpenCL
 
         if (err != CL_SUCCESS)
         {
+            Gpu::OpenCL::LogCLError("Failed to Set Event Callback", err);
             clReleaseEvent(WriteEvent);
             delete State;
             return nullptr;
@@ -240,12 +244,14 @@ namespace Gpu::OpenCL
         OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
         if (!_queue || !ImageObject || !dstData)
         {
+            Gpu::OpenCL::LogCLError("Failed to Download Async", CL_INVALID_VALUE);
             return nullptr;
         }
 
         const size_t requiredBytes = GetRequiredBytes(region, layout);
         if (requiredBytes == 0 || dstBytes < requiredBytes)
         {
+            Gpu::OpenCL::LogCLError("Failed to Download Async", CL_INVALID_VALUE);
             return nullptr;
         }
 
@@ -278,6 +284,7 @@ namespace Gpu::OpenCL
 
         if (err != CL_SUCCESS || !readEvent)
         {
+            Gpu::OpenCL::LogCLError("Failed to Enqueue Read Image", err);
             return nullptr;
         }
 
@@ -292,6 +299,7 @@ namespace Gpu::OpenCL
         OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
         if (!_queue || !ImageObject || !value)
         {
+            Gpu::OpenCL::LogCLError("Failed to Fill Async", CL_INVALID_VALUE);
             return nullptr;
         }
 
@@ -311,6 +319,7 @@ namespace Gpu::OpenCL
 
         if (err != CL_SUCCESS)
         {
+            Gpu::OpenCL::LogCLError("Failed to Enqueue Fill Image", err);
             return nullptr;
         }
         return static_pointer_cast<IEvent>(std::make_shared<Event>(ev));

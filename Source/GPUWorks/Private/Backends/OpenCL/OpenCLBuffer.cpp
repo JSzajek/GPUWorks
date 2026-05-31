@@ -578,6 +578,30 @@ struct AsyncMappedTransferState
         }
 	}
 
+    bool Buffer::Copy(IQueue& queue,
+                      IBuffer& buffer)
+    {
+        OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
+        if (!_queue || !mpMemObject)
+        {
+            return false;
+        }
+
+        clEnqueueCopyBuffer(_queue->GetCLQueue(), 
+                            mpMemObject,
+                            reinterpret_cast<OpenCL::Buffer*>(&buffer)->GetCLMem(),
+                            0,
+                            0,
+                            mDescription.SizeBytes,
+                            0,
+                            nullptr,
+                            nullptr);
+
+        // TODO:: Handle SVM buffers
+
+        return true;
+    }
+
 	void Buffer::Initialize()
 	{
         bool usedFallback = false;

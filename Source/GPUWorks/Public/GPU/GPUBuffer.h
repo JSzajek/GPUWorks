@@ -45,5 +45,7 @@ namespace Gpu
                                                       void* dst,
                                                       size_t bytes,
                                                       size_t offset = 0) = 0;
+
+        virtual bool Copy(IQueue& queue, IBuffer& buffer) = 0;
     };
 }

@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "Private/GPUWorksLog.h"
+
 #ifndef GPU_OPENCL_CHECK
 #define GPU_OPENCL_CHECK(expr) \
     do { \
@@ -78,4 +80,10 @@ namespace Gpu::OpenCL
                 return CL_MEM_READ_WRITE;
         }
     }
+
+    inline void LogCLError(const std::string& message,
+                           cl_int err)
+    {
+        UE_LOG(LogGPUWorks, Warning, TEXT("%s: %s"), *FString(message.c_str()), *FString(GetErrorString(err).c_str()));
+	}
 }
