@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Widgets/Text/STextBlock.h"
-#include "Widgets//SLineNumberBox.h"
+#include "Widgets/SLineNumberBox.h"
 #include "Widgets/Input/STextComboBox.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
+#include "Widgets/Layout/SScrollBar.h"
 
 #include "GPUWorksLib.h"
 
@@ -28,6 +29,8 @@ private:
 	void InsertTabOrUnindent(bool shiftMod);
 	void UpdateLineNumbers(const FString& Text);
 
+	void SetCompileResult(bool success,
+						  const FString& message);
 	EGPUBackend GetSelectedBackend() const;
 private:
 	TWeakObjectPtr<UGPUProgramAsset> mpProgramAsset;
@@ -37,6 +40,8 @@ private:
 
 	TSharedPtr<SMultiLineEditableTextBox> mpSourceEditor;
 	TSharedPtr<STextBlock> mpStatusText;
-	TSharedPtr<SMultiLineEditableTextBox> mpErrorLogOutput;
+	TSharedPtr<SMultiLineEditableTextBox> mpLogOutput;
 	TSharedPtr<SLineNumberBox> mpLineNumberDisplay;
+
+	TSharedPtr<SScrollBar> mpEditorVScrollBar;
 };

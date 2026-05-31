@@ -44,19 +44,25 @@ void SShaderEditorWidget::Construct(const FArguments& InArgs)
 		// Main text editor with line numbers
 		+ SVerticalBox::Slot().FillHeight(1).Padding(2)
 		[
-			SNew(SHorizontalBox)
+			SNew(SScrollBox)
+				.Orientation(Orient_Vertical)
 
-			+ SHorizontalBox::Slot().AutoWidth().Padding(4)
+			+ SScrollBox::Slot()
 			[
-				SAssignNew(mpLineNumberDisplay, SLineNumberBox)
-			]
+				SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot().AutoWidth().Padding(4, 0)
+					[
+						SAssignNew(mpLineNumberDisplay, SLineNumberBox)
+							.Font(FAppStyle::GetFontStyle("MonoFont"))
+					]
 
-			+ SHorizontalBox::Slot().FillWidth(1)
-			[
-				SAssignNew(mpSourceEditor, SMultiLineEditableTextBox).Text(FText::FromString(mpProgramAsset.IsValid() ? mpProgramAsset->GetSourceCodeForBackend(GetSelectedBackend()) : TEXT("")))
-																     .OnTextChanged(this, &SShaderEditorWidget::OnSourceChanged)
-																	 .OnKeyDownHandler(this, &SShaderEditorWidget::OnHandleKeyDown)
-																     .Font(FAppStyle::GetFontStyle("MonoFont"))
+					+ SHorizontalBox::Slot().FillWidth(1)
+					[
+						SAssignNew(mpSourceEditor, SMultiLineEditableTextBox).Text(FText::FromString(mpProgramAsset.IsValid() ? mpProgramAsset->GetSourceCodeForBackend(GetSelectedBackend()) : TEXT("")))
+							.OnTextChanged(this, &SShaderEditorWidget::OnSourceChanged)
+							.OnKeyDownHandler(this, &SShaderEditorWidget::OnHandleKeyDown)
+							.Font(FAppStyle::GetFontStyle("MonoFont"))
+					]
 			]
 		]
 
@@ -68,7 +74,7 @@ void SShaderEditorWidget::Construct(const FArguments& InArgs)
 
 			+ SScrollBox::Slot()
 			[
-				SAssignNew(mpErrorLogOutput, SMultiLineEditableTextBox).Text(FText::FromString(""))
+				SAssignNew(mpLogOutput, SMultiLineEditableTextBox).Text(FText::FromString(""))
 																	   .IsReadOnly(true)
 																	   .AutoWrapText(true)
 			]
@@ -92,13 +98,10 @@ FReply SShaderEditorWidget::OnCompileClicked()
 
 	FString programSource = mpProgramAsset->GetSourceCodeForBackend(GetSelectedBackend());
 
-	FString compileLog = "";
-	bool success = true;
-
 	if (programSource.IsEmpty())
 	{
-		success = false;
-		compileLog = "Empty Program!";
+		SetCompileResult(false, "Empty Program!");
+		return FReply::Handled();
 	}
 	else
 	{
@@ -122,49 +125,36 @@ FReply SShaderEditorWidget::OnCompileClicked()
 		std::shared_ptr<Gpu::ICore> core = Gpu::Factory::Create(desc);
 		if (!core)
 		{
-			success = false;
-			compileLog = "Failed to create GPU Core with the selected backend. Please ensure your system supports the selected GPU backend and try again.";
+			SetCompileResult(false, "Failed to create GPU Core with the selected backend. Please ensure your system supports the selected GPU backend and try again.");
+			return FReply::Handled();
 		}
 
 		std::shared_ptr<Gpu::IDevice> device = core->GetDevice(0);
 		if (!device)
 		{
-			success = false;
-			compileLog = "Failed to create GPU Device with the selected backend. Please ensure your system supports the selected GPU backend and try again.";
+			SetCompileResult(false, "Failed to create GPU Device with the selected backend. Please ensure your system supports the selected GPU backend and try again.");
+			return FReply::Handled();
 		}
 
 		std::shared_ptr<Gpu::IContext> context = core->CreateContext(device);
 		if (!context)
 		{
-			success = false;
-			compileLog = "Failed to create GPU Context with the selected backend. Please ensure your system supports the selected GPU backend and try again.";
+			SetCompileResult(false, "Failed to create GPU Context with the selected backend. Please ensure your system supports the selected GPU backend and try again.");
+			return FReply::Handled();
 		}
 		// --------------------------------------------------------------------
 
-		if (success)
+		std::string buildLog;
+		std::shared_ptr<Gpu::IProgram> program = context->CreateProgramFromSource(sourceCode, &buildLog);
+		FString compileLog = UTF8_TO_TCHAR(buildLog.c_str());
+		if (!program)
 		{
-			std::string buildLog;
-			std::shared_ptr<Gpu::IProgram> program = context->CreateProgramFromSource(sourceCode, &buildLog);
-			compileLog = UTF8_TO_TCHAR(buildLog.c_str());
-
-			if (!program)
-			{
-				success = false;
-			}
+			SetCompileResult(true, compileLog);
+			return FReply::Handled();
 		}
+
+		SetCompileResult(true, compileLog);
 	}
-
-	// Update Status Line
-	if (mpStatusText.IsValid())
-	{
-		mpStatusText->SetText(FText::FromString(success ? TEXT("Compiled") : TEXT("Failed")));
-		mpStatusText->SetColorAndOpacity(success ? FLinearColor::Green : FLinearColor::Red);
-	}
-
-	// Update Error Log
-	if (mpErrorLogOutput.IsValid())
-		mpErrorLogOutput->SetText(FText::FromString(compileLog));
-
 	return FReply::Handled();
 }
 
@@ -253,12 +243,35 @@ void SShaderEditorWidget::InsertTabOrUnindent(bool shiftMod)
 
 void SShaderEditorWidget::UpdateLineNumbers(const FString& Text)
 {
-	TArray<FString> Lines;
-	Text.ParseIntoArrayLines(Lines, false);
+	int32_t NumLines = 1;
+	for (TCHAR C : Text)
+	{
+		if (C == TEXT('\n'))
+		{
+			++NumLines;
+		}
+	}
 
 	if (mpLineNumberDisplay.IsValid())
 	{
-		mpLineNumberDisplay->UpdateLineNumbers(Lines.Num());
+		mpLineNumberDisplay->UpdateLineNumbers(NumLines);
+	}
+}
+
+void SShaderEditorWidget::SetCompileResult(bool success,
+										   const FString& message)
+{
+	// Update Status Line
+	if (mpStatusText.IsValid())
+	{
+		mpStatusText->SetText(FText::FromString(success ? TEXT("Compiled") : TEXT("Failed")));
+		mpStatusText->SetColorAndOpacity(success ? FLinearColor::Green : FLinearColor::Red);
+	}
+
+	// Update Error Log
+	if (mpLogOutput.IsValid())
+	{
+		mpLogOutput->SetText(FText::FromString(message));
 	}
 }
 
