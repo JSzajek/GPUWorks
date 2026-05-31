@@ -20,17 +20,17 @@ public:
 
 	virtual FName GetToolkitFName() const override 
 	{ 
-		return "CLProgramEditor"; 
+		return "GPUProgramEditor"; 
 	}
 
 	virtual FText GetBaseToolkitName() const override 
 	{ 
-		return NSLOCTEXT("CLWorks", "CLProgramEditor", "CL Program Editor");
+		return NSLOCTEXT("GPUWorks", "GPUProgramEditor", "GPU Program Editor");
 	}
 
 	virtual FString GetWorldCentricTabPrefix() const override 
 	{ 
-		return TEXT("CLProgram"); 
+		return TEXT("GPUProgram"); 
 	}
 
 	virtual FLinearColor GetWorldCentricTabColorScale() const override 

@@ -15,11 +15,11 @@ void FGPUWorksEditorModule::StartupModule()
 
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
-	EAssetTypeCategories::Type CLCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("GPUWorksEditor")),		// Internal category name
-																					 FText::FromString(TEXT("CL")));	// Display name
+	EAssetTypeCategories::Type GGPUCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("GPUWorksEditor")),		// Internal category name
+																					 FText::FromString(TEXT("GGPU")));	// Display name
 
 	// Register Custom Asset Actions
-	AssetActions = MakeShareable(new FGPUProgramAssetActions(CLCategory));
+	AssetActions = MakeShareable(new FGPUProgramAssetActions(GGPUCategory));
 	AssetTools.RegisterAssetTypeActions(AssetActions.ToSharedRef());
 }
 
