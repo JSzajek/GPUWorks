@@ -50,14 +50,14 @@ namespace Gpu::OpenCL
             return nullptr;
         }
 
-        const size_t global[3] = { desc.Global[0], desc.Global[1], desc.Global[2] };
-        const size_t local[3] = { desc.Local[0], desc.Local[1], desc.Local[2] };
+        const size_t global[3] = { desc.mGlobal[0], desc.mGlobal[1], desc.mGlobal[2] };
+        const size_t local[3] = { desc.mLocal[0], desc.mLocal[1], desc.mLocal[2] };
         const size_t* localPtr = (local[0] == 0) ? nullptr : local;
 
         cl_event outEvent = nullptr;
         const cl_int err = clEnqueueNDRangeKernel(mpQueueHandle,
                                                   kernel->GetCLKernel(),
-                                                  static_cast<cl_uint>(desc.Dim),
+                                                  static_cast<cl_uint>(desc.mDim),
                                                   nullptr,
                                                   global,
                                                   localPtr,
@@ -74,20 +74,20 @@ namespace Gpu::OpenCL
         }
 
         Gpu::ProfiledKernelHandle Handle;
-        Handle.Backend = Gpu::Backend::OpenCL;
-        Handle.NativeEvent = outEvent;
-        Handle.NativeKernel = kernel->GetCLKernel();
-        Handle.NativeDevice = attachedDevice->GetCLDevice();
+        Handle.mBackend = Gpu::Backend::OpenCL;
+        Handle.mpNativeEvent = outEvent;
+        Handle.mpNativeKernel = kernel->GetCLKernel();
+        Handle.mpNativeDevice = attachedDevice->GetCLDevice();
 
         Gpu::KernelDispatchInfo Dispatch;
-        Dispatch.Name = FString(UTF8_TO_TCHAR(kernel->GetName().c_str()));
-        Dispatch.Backend = Gpu::Backend::OpenCL;
-        Dispatch.Dim = static_cast<uint32>(desc.Dim);
+        Dispatch.mName = FString(UTF8_TO_TCHAR(kernel->GetName().c_str()));
+        Dispatch.mBackend = Gpu::Backend::OpenCL;
+        Dispatch.mDimensions = static_cast<uint32>(desc.mDim);
 
-        for (uint32 i = 0; i < Dispatch.Dim; ++i)
+        for (uint32 i = 0; i < Dispatch.mDimensions; ++i)
         {
-            Dispatch.Global[i] = global[i];
-            Dispatch.Local[i] = local[i];
+            Dispatch.mGlobal[i] = global[i];
+            Dispatch.mLocal[i] = local[i];
         }
 
         FGPUProfilerManager::EnqueueProfiledKernel(Handle, Dispatch);

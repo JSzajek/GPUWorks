@@ -2,7 +2,6 @@
 
 #include "GPUWorksLog.h"
 
-
 FString UGPUProgramAsset::GetSourceCodeForBackend(EGPUBackend backend) const
 {
     switch (backend)

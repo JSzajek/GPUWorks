@@ -1,12 +1,12 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
-#include <string>
-#include <vector>
 
 namespace Gpu
 {
+    /// <summary>
+	/// Backend types for GPU execution.
+    /// </summary>
     enum class Backend : uint8_t
     {
         Unknown = 0,
@@ -14,6 +14,9 @@ namespace Gpu
         CUDA,
     };
 
+    /// <summary>
+	/// Access types for GPU resources.
+    /// </summary>
     enum class Access : uint8_t
     {
         ReadOnly,
@@ -21,6 +24,9 @@ namespace Gpu
         ReadWrite
     };
 
+    /// <summary>
+	/// Memory usage types for GPU resources.
+    /// </summary>
     enum class MemoryUsage : uint8_t
     {
         // device-local / regular device allocation
@@ -36,6 +42,9 @@ namespace Gpu
         Shared,
     };
 
+    /// <summary>
+	/// Buffer synchronization modes for GPU resources.
+    /// </summary>
     enum class BufferSyncMode : uint8_t
     {
         // Backend will decide the best synchronization method
@@ -51,6 +60,9 @@ namespace Gpu
         ZeroCopy
     };
 
+    /// <summary>
+	/// Program formats for GPU kernels.
+    /// </summary>
     enum class ProgramFormat : uint8_t
     {
         Source,
@@ -58,6 +70,9 @@ namespace Gpu
         Binary
     };
 
+    /// <summary>
+	/// Image types for GPU resources.
+    /// </summary>
     enum class ImageType : uint8_t
     {
         Tex2D,
@@ -65,6 +80,9 @@ namespace Gpu
         Tex3D,
     };
 
+    /// <summary>
+	/// Pixel formats for GPU resources.
+    /// </summary>
     enum class PixelFormat : uint32_t
     {
         Unknown = 0,

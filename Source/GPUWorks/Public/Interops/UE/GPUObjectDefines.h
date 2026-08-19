@@ -5,6 +5,10 @@
 
 #include "GPUObjectDefines.generated.h"
 
+/// <summary>
+/// Enum representing the type of GPU access for a resource.
+/// This determines how the resource can be accessed and used in GPU operations.
+/// </summary>
 UENUM(BlueprintType)
 enum class UGPUAccessType : uint8
 {
@@ -13,6 +17,10 @@ enum class UGPUAccessType : uint8
 	READ_WRITE		UMETA(DisplayName = "Read-Write"),
 };
 
+/// <summary>
+/// Enum representing the memory strategy for GPU resources.
+/// This determines how the resource is allocated and accessed in GPU memory.
+/// </summary>
 UENUM(BlueprintType)
 enum class UGPUMemoryStrategy : uint8
 {
@@ -21,6 +29,11 @@ enum class UGPUMemoryStrategy : uint8
 	ZERO_COPY		UMETA(DisplayName = "Zero-Copy"),
 };
 
+/// <summary>
+/// Enum representing the type of GPU image resource.
+/// This determines the dimensionality and structure of the image data,
+/// which affects how it can be used in GPU operations.
+/// </summary>
 UENUM(BlueprintType)
 enum class UGPUImageType : uint8
 {
@@ -29,6 +42,10 @@ enum class UGPUImageType : uint8
 	Texture3D		UMETA(DisplayName = "3D"),
 };
 
+/// <summary>
+/// Enum representing the pixel format of a GPU image resource.
+/// This determines how the pixel data is stored and interpreted in GPU memory.
+/// </summary>
 UENUM(BlueprintType)
 enum class UGPUImageFormat : uint8
 {

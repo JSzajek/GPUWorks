@@ -23,7 +23,7 @@ namespace Gpu::OpenCL
         virtual ~Buffer() override;
 
         virtual Backend GetBackend() const override { return Backend::OpenCL; }
-        virtual size_t GetSize() const override { return mDescription.SizeBytes; }
+        virtual size_t GetSize() const override { return mDescription.mSizeBytes; }
         virtual const BufferDescription& GetDescription() const override { return mDescription; }
         cl_mem GetCLMem() const { return mpMemObject; }
 

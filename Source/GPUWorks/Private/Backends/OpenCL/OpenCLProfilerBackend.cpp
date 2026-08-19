@@ -9,7 +9,7 @@ namespace Gpu::OpenCL
 {
     bool ProfilerBackend::RetainProfiledHandle(ProfiledKernelHandle& Handle)
     {
-        cl_event Event = static_cast<cl_event>(Handle.NativeEvent);
+        cl_event Event = static_cast<cl_event>(Handle.mpNativeEvent);
         if (!Event)
         {
             return false;
@@ -20,17 +20,17 @@ namespace Gpu::OpenCL
 
     void ProfilerBackend::ReleaseProfiledHandle(ProfiledKernelHandle& Handle)
     {
-        cl_event Event = static_cast<cl_event>(Handle.NativeEvent);
+        cl_event Event = static_cast<cl_event>(Handle.mpNativeEvent);
         if (Event)
         {
             clReleaseEvent(Event);
-            Handle.NativeEvent = nullptr;
+            Handle.mpNativeEvent = nullptr;
         }
     }
 
     bool ProfilerBackend::IsComplete(const ProfiledKernelHandle& Handle)
     {
-        cl_event _event = static_cast<cl_event>(Handle.NativeEvent);
+        cl_event _event = static_cast<cl_event>(Handle.mpNativeEvent);
         if (!_event)
         {
             return true;
@@ -50,7 +50,7 @@ namespace Gpu::OpenCL
                                       uint64_t& OutStartTimeNs,
                                       uint64_t& OutEndTimeNs)
     {
-        cl_event Event = static_cast<cl_event>(Handle.NativeEvent);
+        cl_event Event = static_cast<cl_event>(Handle.mpNativeEvent);
         if (!Event)
         {
             return false;
@@ -77,8 +77,8 @@ namespace Gpu::OpenCL
     bool ProfilerBackend::QueryKernelStaticInfo(const ProfiledKernelHandle& Handle,
                                                 KernelStaticInfo& OutInfo)
     {
-        cl_kernel Kernel = static_cast<cl_kernel>(Handle.NativeKernel);
-        cl_device_id Device = static_cast<cl_device_id>(Handle.NativeDevice);
+        cl_kernel Kernel = static_cast<cl_kernel>(Handle.mpNativeKernel);
+        cl_device_id Device = static_cast<cl_device_id>(Handle.mpNativeDevice);
 
         if (!Kernel || !Device)
         {
@@ -89,21 +89,21 @@ namespace Gpu::OpenCL
                                  Device,
                                  CL_KERNEL_WORK_GROUP_SIZE,
                                  sizeof(size_t),
-                                 &OutInfo.KernelWorkGroupSize,
+                                 &OutInfo.mKernelWorkGroupSize,
                                  nullptr);
 
         clGetKernelWorkGroupInfo(Kernel,
                                  Device,
                                  CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
                                  sizeof(size_t),
-                                 &OutInfo.PreferredWorkGroupMultiple,
+                                 &OutInfo.mPreferredWorkGroupMultiple,
                                  nullptr);
 
         clGetKernelWorkGroupInfo(Kernel,
                                  Device,
                                  CL_KERNEL_COMPILE_WORK_GROUP_SIZE,
-                                 sizeof(OutInfo.CompiledWorkGroupSize),
-                                 &OutInfo.CompiledWorkGroupSize,
+                                 sizeof(OutInfo.mCompiledWorkGroupSize),
+                                 &OutInfo.mCompiledWorkGroupSize,
                                  nullptr);
 
         cl_ulong PrivateMem = 0;
@@ -123,8 +123,8 @@ namespace Gpu::OpenCL
                                  &LocalMem,
                                  nullptr);
 
-        OutInfo.PrivateMemoryBytes = static_cast<uint64>(PrivateMem);
-        OutInfo.LocalMemoryBytes = static_cast<uint64>(LocalMem);
+        OutInfo.mPrivateMemoryBytes = static_cast<uint64>(PrivateMem);
+        OutInfo.mLocalMemoryBytes = static_cast<uint64>(LocalMem);
 
         return true;
     }
@@ -132,8 +132,8 @@ namespace Gpu::OpenCL
     HardwareMetrics ProfilerBackend::QueryHardwareMetrics()
     {
         Gpu::FactoryDesc desc;
-        desc.PreferredBackend = Gpu::Backend::OpenCL;
-        desc.bAllowFallback = false;
+        desc.mPreferredBackend = Gpu::Backend::OpenCL;
+        desc.mAllowFallback = false;
         
         std::shared_ptr<Gpu::ICore> corePtr = Gpu::Factory::Create(desc);
         std::shared_ptr<Gpu::OpenCL::Device> devicePtr = reinterpret_pointer_cast<Gpu::OpenCL::Device>(corePtr->GetDevice(0));

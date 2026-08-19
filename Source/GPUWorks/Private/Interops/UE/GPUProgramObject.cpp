@@ -10,16 +10,16 @@ bool UGPUProgramObject::BuildFromSource(UGPUContextObject* contextObject,
 {
     if (!contextObject || !contextObject->GetContext())
     {
-        LastBuildLog = TEXT("Invalid GPU context.");
+        mLastBuildLog = TEXT("Invalid GPU context.");
         return false;
     }
 
     std::string buildLog;
-    Program = contextObject->GetContext()->CreateProgramFromSource(TCHAR_TO_UTF8(*source),
+    mpProgram = contextObject->GetContext()->CreateProgramFromSource(TCHAR_TO_UTF8(*source),
                                                                    &buildLog);
 
-    LastBuildLog = UTF8_TO_TCHAR(buildLog.c_str());
-    return Program != nullptr;
+    mLastBuildLog = UTF8_TO_TCHAR(buildLog.c_str());
+    return mpProgram != nullptr;
 }
 
 bool UGPUProgramObject::BuildFromAsset(UGPUContextObject* contextObject,
@@ -27,51 +27,51 @@ bool UGPUProgramObject::BuildFromAsset(UGPUContextObject* contextObject,
 {
     if (!contextObject || !contextObject->GetContext())
     {
-        LastBuildLog = TEXT("Invalid GPU context.");
+        mLastBuildLog = TEXT("Invalid GPU context.");
         return false;
     }
 
 	FString programSource = asset->GetSourceCodeForBackend(contextObject->GetGPUBackend());
 
     std::string buildLog;
-    Program = contextObject->GetContext()->CreateProgramFromSource(TCHAR_TO_UTF8(*programSource),
+    mpProgram = contextObject->GetContext()->CreateProgramFromSource(TCHAR_TO_UTF8(*programSource),
                                                                    &buildLog);
 
-    LastBuildLog = UTF8_TO_TCHAR(buildLog.c_str());
-    return Program != nullptr;
+    mLastBuildLog = UTF8_TO_TCHAR(buildLog.c_str());
+    return mpProgram != nullptr;
 }
 
 void UGPUProgramObject::SetKernel(const FString& kernelName)
 {
-    if (!Program)
+    if (!mpProgram)
     {
         return;
     }
 
     if (HasKernel(kernelName))
     {
-        mpKernel = Program->CreateKernel(TCHAR_TO_UTF8(*kernelName));
+        mpKernel = mpProgram->CreateKernel(TCHAR_TO_UTF8(*kernelName));
     }
 }
 
 bool UGPUProgramObject::IsValidProgram() const
 {
-    return Program != nullptr;
+    return mpProgram != nullptr;
 }
 
 FString UGPUProgramObject::GetLastBuildLog() const
 {
-    return LastBuildLog;
+    return mLastBuildLog;
 }
 
 bool UGPUProgramObject::HasKernel(const FString& kernelName) const
 {
-    if (!Program)
+    if (!mpProgram)
     {
         return false;
     }
 
-    std::shared_ptr<Gpu::IKernel> kernel = Program->CreateKernel(TCHAR_TO_UTF8(*kernelName));
+    std::shared_ptr<Gpu::IKernel> kernel = mpProgram->CreateKernel(TCHAR_TO_UTF8(*kernelName));
     return kernel != nullptr;
 }
 

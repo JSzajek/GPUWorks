@@ -6,9 +6,9 @@
 
 #include "Styling/AppStyle.h"
 
-void SLineNumberBox::Construct(const FArguments& InArgs)
+void SLineNumberBox::Construct(const FArguments& arguments)
 {
-    Font = InArgs._Font;
+    Font = arguments._Font;
 
     ChildSlot
     [
@@ -16,13 +16,13 @@ void SLineNumberBox::Construct(const FArguments& InArgs)
 			.BorderImage(FAppStyle::GetBrush("Brushes.Recessed"))
 			.Padding(FMargin(6.f, 2.f))
 		[
-			SAssignNew(LineScrollBox, SScrollBox)
+			SAssignNew(mLineScrollBox, SScrollBox)
 					   .Orientation(Orient_Vertical)
-					   .ExternalScrollbar(InArgs._ExternalScrollbar)
+					   .ExternalScrollbar(arguments._ExternalScrollbar)
 
 			+ SScrollBox::Slot()
 			[
-				SAssignNew(LineNumbersText, STextBlock)
+				SAssignNew(mLineNumbersText, STextBlock)
 						   .Text(FText::GetEmpty())
 						   .Font(Font)
 						   .Justification(ETextJustify::Right)
@@ -34,22 +34,21 @@ void SLineNumberBox::Construct(const FArguments& InArgs)
 }
 
 
-void SLineNumberBox::UpdateLineNumbers(int32_t NumLines)
+void SLineNumberBox::UpdateLineNumbers(int32_t numLines)
 {
-    NumLines = FMath::Max(1, NumLines);
-
-	if (NumLines == CachedLineCount)
+    numLines = FMath::Max(1, numLines);
+	if (numLines == mCachedLineCount)
 		return;
 
-	CachedLineCount = NumLines;
+	mCachedLineCount = numLines;
 
     FString Text;
-    Text.Reserve(NumLines * 5);
+    Text.Reserve(numLines * 5);
 
-    for (int32 i = 1; i <= NumLines; ++i)
+    for (int32 i = 1; i <= numLines; ++i)
     {
         Text += FString::Printf(TEXT("%d\n"), i);
     }
 
-    LineNumbersText->SetText(FText::FromString(Text));
+    mLineNumbersText->SetText(FText::FromString(Text));
 }

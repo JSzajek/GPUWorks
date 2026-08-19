@@ -94,11 +94,11 @@ namespace Gpu::OpenCL
 	std::shared_ptr<Gpu::IBuffer> Context::CreateBuffer(const BufferDescription& desc)
 	{
         cl_int err = CL_SUCCESS;
-        cl_mem_flags flags = ToCLMemFlags(desc.AccessMode);
+        cl_mem_flags flags = ToCLMemFlags(desc.mAccessMode);
 
         cl_mem mem = clCreateBuffer(mpContextHandle,
                                     flags,
-                                    desc.SizeBytes,
+                                    desc.mSizeBytes,
                                     nullptr,
                                     &err);
 

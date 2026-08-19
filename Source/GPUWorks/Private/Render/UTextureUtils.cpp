@@ -166,7 +166,9 @@ namespace RenderUtils
 								size_t srcIndex = ((srcY * currentWidth + srcX) * srcChannels) + currentLayerOffset;
 
 								for (int c = 0; c < srcChannels; ++c)
+								{
 									channelPixel[c] += currentData[srcIndex + c];
+								}
 
 								++count;
 							}
@@ -175,7 +177,9 @@ namespace RenderUtils
 						size_t nextLayerOffset = layer * nextWidth * nextHeight * srcChannels;
 						const size_t dstIndex = ((y * nextWidth + x) * srcChannels) + nextLayerOffset;
 						for (int c = 0; c < srcChannels; ++c)
+						{
 							nextData[dstIndex + c] = static_cast<V>(std::floor(channelPixel[c] / count));
+						}
 					}
 				}
 			}
@@ -192,14 +196,19 @@ namespace RenderUtils
 		}
 	}
 
-	void GenerateMipsInt8(std::vector<Mip>& output,
-						  uint8_t* const src,
-						  size_t srcWidth, 
-						  size_t srcHeight,
-						  size_t srcLayers,
-						  uint8_t srcChannels)
+	void GenerateMipsUInt8(std::vector<Mip>& output,
+						   uint8_t* const src,
+						   size_t srcWidth, 
+						   size_t srcHeight,
+						   size_t srcLayers,
+						   uint8_t srcChannels)
 	{
-		GenerateMip<uint8_t, size_t>(output, src, srcWidth, srcHeight, srcLayers, srcChannels);
+		GenerateMip<uint8_t, size_t>(output,
+									 src,
+									 srcWidth,
+									 srcHeight,
+									 srcLayers,
+									 srcChannels);
 	}
 
 	void GenerateMipsUInt32(std::vector<Mip>& output, 
@@ -209,7 +218,12 @@ namespace RenderUtils
 							size_t srcLayers, 
 							uint8_t srcChannels)
 	{
-		GenerateMip<uint32_t, size_t>(output, src, srcWidth, srcHeight, srcLayers, srcChannels);
+		GenerateMip<uint32_t, size_t>(output,
+									  src,
+									  srcWidth,
+									  srcHeight,
+									  srcLayers,
+									  srcChannels);
 	}
 
 	void GenerateMipsInt32(std::vector<Mip>& output, 
@@ -219,7 +233,12 @@ namespace RenderUtils
 						   size_t srcLayers, 
 						   uint8_t srcChannels)
 	{
-		GenerateMip<int32_t, size_t>(output, src, srcWidth, srcHeight, srcLayers, srcChannels);
+		GenerateMip<int32_t, size_t>(output,
+									 src,
+									 srcWidth,
+									 srcHeight,
+									 srcLayers,
+									 srcChannels);
 	}
 
 	void GenerateMipsFloat16(std::vector<Mip>& output,
@@ -229,7 +248,12 @@ namespace RenderUtils
 							 size_t srcLayers,
 						     uint8_t srcChannels)
 	{
-		GenerateMip<FFloat16, float>(output, src, srcWidth, srcHeight, srcLayers, srcChannels);
+		GenerateMip<FFloat16, float>(output,
+									 src,
+									 srcWidth,
+									 srcHeight,
+									 srcLayers,
+									 srcChannels);
 	}
 
 	void GenerateMipsFloat(std::vector<Mip>& output,
@@ -239,6 +263,11 @@ namespace RenderUtils
 						   size_t srcLayers,
 						   uint8_t srcChannels)
 	{
-		GenerateMip<float, float>(output, src, srcWidth, srcHeight, srcLayers, srcChannels);
+		GenerateMip<float, float>(output,
+								  src,
+								  srcWidth,
+								  srcHeight,
+								  srcLayers,
+								  srcChannels);
 	}
 };

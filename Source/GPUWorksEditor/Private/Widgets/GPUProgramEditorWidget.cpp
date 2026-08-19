@@ -10,7 +10,7 @@
 
 #include "GPUWorksLib.h"
 
-void SGPUProgramEditorWidget::Construct(const FArguments& InArgs)
+void SGPUProgramEditorWidget::Construct(const FArguments& arguments)
 {
 	mProgramLanguageOptions =
 	{
@@ -19,9 +19,9 @@ void SGPUProgramEditorWidget::Construct(const FArguments& InArgs)
 		MakeShared<FString>("SharedGPUDSL"),
 	};
 
-	bIsCompiling = false;
+	mIsCompiling = false;
 
-	mpProgramAsset = InArgs._ProgramAsset;
+	mpProgramAsset = arguments._ProgramAsset;
 
 	SAssignNew(mpEditorVScrollBar, SScrollBar)
 			   .Orientation(Orient_Vertical);
@@ -46,11 +46,11 @@ void SGPUProgramEditorWidget::Construct(const FArguments& InArgs)
 				SAssignNew(mpCompileButton, SButton)
 						   .Text_Lambda([this]()
 						   {
-								return FText::FromString(bIsCompiling ? TEXT("Compiling...") : TEXT("Compile [Ctrl+Enter]"));
+								return FText::FromString(mIsCompiling ? TEXT("Compiling...") : TEXT("Compile [Ctrl+Enter]"));
 						   })
 						   .IsEnabled_Lambda([this]()
 						   {
-						   		return !bIsCompiling;
+						   		return !mIsCompiling;
 						   })
 						   .OnClicked(this, &SGPUProgramEditorWidget::OnCompileClicked)
 			]
@@ -113,7 +113,7 @@ void SGPUProgramEditorWidget::Construct(const FArguments& InArgs)
 
 FReply SGPUProgramEditorWidget::OnCompileClicked()
 {
-	bIsCompiling = true;
+	mIsCompiling = true;
 
 	if (mpStatusText.IsValid())
 	{
@@ -125,80 +125,6 @@ FReply SGPUProgramEditorWidget::OnCompileClicked()
 		return FReply::Handled();
 	}
 	return FReply::Handled();
-}
-
-void SGPUProgramEditorWidget::CompileProgram()
-{
-	TWeakPtr<SGPUProgramEditorWidget> weakPtr = SharedThis(this);
-	AsyncTask(ENamedThreads::BackgroundThreadPriority, [weakPtr]()
-	{
-		auto self = weakPtr.Pin();
-		if (!self)
-			return;
-
-		if (!self->mpProgramAsset.IsValid())
-			return;
-
-		FString programSource = self->mpProgramAsset->GetSourceCodeForBackend(self->GetSelectedBackend());
-
-		if (programSource.IsEmpty())
-		{
-			self->SetCompileResult(false, "Empty Program!");
-			return;
-		}
-		else
-		{
-			const std::string sourceCode(TCHAR_TO_UTF8(*programSource));
-
-			// Internal Data ------------------------------------------------------
-			Gpu::FactoryDesc desc;
-			desc.bAllowFallback = false;
-
-			desc.PreferredBackend = Gpu::Backend::Unknown;
-			switch (self->GetSelectedBackend())
-			{
-			case EGPUBackend::OpenCL:
-				desc.PreferredBackend = Gpu::Backend::OpenCL;
-				break;
-			case EGPUBackend::CUDA:
-				desc.PreferredBackend = Gpu::Backend::CUDA;
-				break;
-			}
-
-			std::shared_ptr<Gpu::ICore> core = Gpu::Factory::Create(desc);
-			if (!core)
-			{
-				self->SetCompileResult(false, "Failed to create GPU Core with the selected backend. Please ensure your system supports the selected GPU backend and try again.");
-				return;
-			}
-
-			std::shared_ptr<Gpu::IDevice> device = core->GetDevice(0);
-			if (!device)
-			{
-				self->SetCompileResult(false, "Failed to create GPU Device with the selected backend. Please ensure your system supports the selected GPU backend and try again.");
-				return;
-			}
-
-			std::shared_ptr<Gpu::IContext> context = core->CreateContext(device);
-			if (!context)
-			{
-				self->SetCompileResult(false, "Failed to create GPU Context with the selected backend. Please ensure your system supports the selected GPU backend and try again.");
-				return;
-			}
-			// --------------------------------------------------------------------
-
-			std::string buildLog;
-			std::shared_ptr<Gpu::IProgram> program = context->CreateProgramFromSource(sourceCode, &buildLog);
-			FString compileLog = UTF8_TO_TCHAR(buildLog.c_str());
-			if (!program)
-			{
-				self->SetCompileResult(false, compileLog);
-				return;
-			}
-
-			self->SetCompileResult(true, compileLog);
-		}
-	});
 }
 
 void SGPUProgramEditorWidget::OnSourceChanged(const FText& NewText)
@@ -246,6 +172,80 @@ FReply SGPUProgramEditorWidget::OnHandleKeyDown(const FGeometry& MyGeometry,
 	}
 
 	return FReply::Unhandled();
+}
+
+void SGPUProgramEditorWidget::CompileProgram()
+{
+	TWeakPtr<SGPUProgramEditorWidget> weakPtr = SharedThis(this);
+	AsyncTask(ENamedThreads::BackgroundThreadPriority, [weakPtr]()
+	{
+		auto self = weakPtr.Pin();
+		if (!self)
+			return;
+
+		if (!self->mpProgramAsset.IsValid())
+			return;
+
+		FString programSource = self->mpProgramAsset->GetSourceCodeForBackend(self->GetSelectedBackend());
+
+		if (programSource.IsEmpty())
+		{
+			self->SetCompileResult(false, "Empty Program!");
+			return;
+		}
+		else
+		{
+			const std::string sourceCode(TCHAR_TO_UTF8(*programSource));
+
+			// Internal Data ------------------------------------------------------
+			Gpu::FactoryDesc desc;
+			desc.mAllowFallback = false;
+
+			desc.mPreferredBackend = Gpu::Backend::Unknown;
+			switch (self->GetSelectedBackend())
+			{
+				case EGPUBackend::OpenCL:
+					desc.mPreferredBackend = Gpu::Backend::OpenCL;
+					break;
+				case EGPUBackend::CUDA:
+					desc.mPreferredBackend = Gpu::Backend::CUDA;
+					break;
+			}
+
+			std::shared_ptr<Gpu::ICore> core = Gpu::Factory::Create(desc);
+			if (!core)
+			{
+				self->SetCompileResult(false, "Failed to create GPU Core with the selected backend. Please ensure your system supports the selected GPU backend and try again.");
+				return;
+			}
+
+			std::shared_ptr<Gpu::IDevice> device = core->GetDevice(0);
+			if (!device)
+			{
+				self->SetCompileResult(false, "Failed to create GPU Device with the selected backend. Please ensure your system supports the selected GPU backend and try again.");
+				return;
+			}
+
+			std::shared_ptr<Gpu::IContext> context = core->CreateContext(device);
+			if (!context)
+			{
+				self->SetCompileResult(false, "Failed to create GPU Context with the selected backend. Please ensure your system supports the selected GPU backend and try again.");
+				return;
+			}
+			// --------------------------------------------------------------------
+
+			std::string buildLog;
+			std::shared_ptr<Gpu::IProgram> program = context->CreateProgramFromSource(sourceCode, &buildLog);
+			FString compileLog = UTF8_TO_TCHAR(buildLog.c_str());
+			if (!program)
+			{
+				self->SetCompileResult(false, compileLog);
+				return;
+			}
+
+			self->SetCompileResult(true, compileLog);
+		}
+	});
 }
 
 void SGPUProgramEditorWidget::InsertTabOrUnindent(bool shiftMod)
@@ -318,8 +318,8 @@ void SGPUProgramEditorWidget::SetCompileResult(bool success,
 {
 	AsyncTask(ENamedThreads::GameThread, [this, success, message]()
 	{
-		bIsCompiling = false;
-		bDirty = !success;
+		mIsCompiling = false;
+		mIsDirty = !success;
 
 		// Update Status Line
 		if (mpStatusText.IsValid())
@@ -338,9 +338,9 @@ void SGPUProgramEditorWidget::SetCompileResult(bool success,
 
 void SGPUProgramEditorWidget::SetDirty(bool isDirty)
 {
-	bDirty = isDirty;
+	mIsDirty = isDirty;
 
-	if (mpStatusText.IsValid() && bDirty)
+	if (mpStatusText.IsValid() && mIsDirty)
 	{
 		mpStatusText->SetText(FText::FromString(TEXT("Modified")));
 		mpStatusText->SetColorAndOpacity(FLinearColor::Yellow);

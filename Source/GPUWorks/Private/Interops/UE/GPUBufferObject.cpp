@@ -12,45 +12,45 @@ bool UGPUBufferObject::Initialize(UGPUContextObject* contextObject,
     }
 
     Gpu::BufferDescription desc;
-    desc.SizeBytes = static_cast<size_t>(sizeBytes);
-    desc.Usage = Gpu::MemoryUsage::Default;
+    desc.mSizeBytes = static_cast<size_t>(sizeBytes);
+    desc.mUsage = Gpu::MemoryUsage::Default;
 
     if (bReadOnly)
     {
-        desc.AccessMode = Gpu::Access::ReadOnly;
+        desc.mAccessMode = Gpu::Access::ReadOnly;
     }
     else if (bWriteOnly)
     {
-        desc.AccessMode = Gpu::Access::WriteOnly;
+        desc.mAccessMode = Gpu::Access::WriteOnly;
     }
     else
     {
-        desc.AccessMode = Gpu::Access::ReadWrite;
+        desc.mAccessMode = Gpu::Access::ReadWrite;
     }
 
-    Buffer = contextObject->GetContext()->CreateBuffer(desc);
-    return Buffer != nullptr;
+    mpBuffer = contextObject->GetContext()->CreateBuffer(desc);
+    return mpBuffer != nullptr;
 }
 
 bool UGPUBufferObject::IsValidBuffer() const
 {
-    return Buffer != nullptr;
+    return mpBuffer != nullptr;
 }
 
 int64 UGPUBufferObject::GetSizeBytes() const
 {
-    return Buffer ? static_cast<int64>(Buffer->GetSize()) : 0;
+    return mpBuffer ? static_cast<int64>(mpBuffer->GetSize()) : 0;
 }
 
 void UGPUBufferObject::CopyBuffer(UGPUContextObject* contextObject,
                                   UGPUBufferObject* otherBuffer)
 {
-    if (!Buffer || !contextObject || !contextObject->GetDefaultQueue())
+    if (!mpBuffer || !contextObject || !contextObject->GetDefaultQueue())
     {
         return;
     }
 
-    Buffer->Copy(*contextObject->GetDefaultQueue(),
+    mpBuffer->Copy(*contextObject->GetDefaultQueue(),
                  *otherBuffer->GetBuffer());
 }
 
@@ -59,12 +59,12 @@ bool UGPUBufferObject::UploadRaw(UGPUContextObject* contextObject,
                                  int64 sizeBytes,
                                  int64 offset)
 {
-    if (!Buffer || !contextObject || !contextObject->GetDefaultQueue() || offset < 0)
+    if (!mpBuffer || !contextObject || !contextObject->GetDefaultQueue() || offset < 0)
     {
         return false;
     }
 
-    return Buffer->Upload(*contextObject->GetDefaultQueue(),
+    return mpBuffer->Upload(*contextObject->GetDefaultQueue(),
                           bytes,
                           static_cast<size_t>(sizeBytes),
                           static_cast<size_t>(offset));
@@ -74,12 +74,12 @@ bool UGPUBufferObject::UploadBytes(UGPUContextObject* contextObject,
                                    const TArray<uint8>& bytes,
                                    int64 offset)
 {
-    if (!Buffer || !contextObject || !contextObject->GetDefaultQueue() || offset < 0)
+    if (!mpBuffer || !contextObject || !contextObject->GetDefaultQueue() || offset < 0)
     {
         return false;
     }
 
-    return Buffer->Upload(*contextObject->GetDefaultQueue(),
+    return mpBuffer->Upload(*contextObject->GetDefaultQueue(),
                           bytes.GetData(),
                           static_cast<size_t>(bytes.Num()),
                           static_cast<size_t>(offset));
@@ -89,13 +89,13 @@ bool UGPUBufferObject::UploadFloatArray(UGPUContextObject* contextObject,
                                         const TArray<float>& values,
                                         int64 offsetBytes)
 {
-    if (!Buffer || !contextObject || !contextObject->GetDefaultQueue() || offsetBytes < 0)
+    if (!mpBuffer || !contextObject || !contextObject->GetDefaultQueue() || offsetBytes < 0)
     {
         return false;
     }
 
     const size_t byteCount = static_cast<size_t>(values.Num()) * sizeof(float);
-    return Buffer->Upload(*contextObject->GetDefaultQueue(),
+    return mpBuffer->Upload(*contextObject->GetDefaultQueue(),
                           values.GetData(),
                           byteCount,
                           static_cast<size_t>(offsetBytes));
@@ -106,19 +106,19 @@ bool UGPUBufferObject::DownloadRaw(UGPUContextObject* contextObject,
                                    int64 bytesToRead,
                                    int64 offset)
 {
-    if (!Buffer || !contextObject || !contextObject->GetDefaultQueue() || offset < 0)
+    if (!mpBuffer || !contextObject || !contextObject->GetDefaultQueue() || offset < 0)
     {
         return false;
     }
 
-    const int64 available = static_cast<int64>(Buffer->GetSize()) - offset;
+    const int64 available = static_cast<int64>(mpBuffer->GetSize()) - offset;
 	if (available <= 0)
 	{
 		return false;
 	}
 
     const int64 readSize = (bytesToRead < 0) ? available : FMath::Min(bytesToRead, available);
-    return Buffer->Download(*contextObject->GetDefaultQueue(),
+    return mpBuffer->Download(*contextObject->GetDefaultQueue(),
                             outBytes,
                             static_cast<size_t>(readSize),
                             static_cast<size_t>(offset));
@@ -129,7 +129,7 @@ bool UGPUBufferObject::DownloadBytes(UGPUContextObject* contextObject,
                                      int64 bytesToRead,
                                      int64 offset)
 {
-    const int64 available = static_cast<int64>(Buffer->GetSize()) - offset;
+    const int64 available = static_cast<int64>(mpBuffer->GetSize()) - offset;
     if (available <= 0)
     {
         return false;
@@ -146,7 +146,7 @@ bool UGPUBufferObject::DownloadFloatArray(UGPUContextObject* contextObject,
                                           int32 floatCount,
                                           int64 offsetBytes)
 {
-    const int64 available = static_cast<int64>(Buffer->GetSize()) - offsetBytes;
+    const int64 available = static_cast<int64>(mpBuffer->GetSize()) - offsetBytes;
     if (available <= 0)
     {
         return false;

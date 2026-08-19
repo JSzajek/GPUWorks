@@ -10,9 +10,9 @@ TArray<TSharedPtr<Gpu::IProfilerBackend>> FGPUProfilerManager::Backends;
 TArray<FGPUProfilerManager::FActiveProfile> FGPUProfilerManager::ActiveProfiles;
 TArray<Gpu::KernelProfile> FGPUProfilerManager::CompletedProfiles;
 
-void FGPUProfilerManager::RegisterBackend(TSharedPtr<Gpu::IProfilerBackend> Backend)
+void FGPUProfilerManager::RegisterBackend(TSharedPtr<Gpu::IProfilerBackend> backend)
 {
-    if (!Backend)
+    if (!backend)
     {
         return;
     }
@@ -20,27 +20,27 @@ void FGPUProfilerManager::RegisterBackend(TSharedPtr<Gpu::IProfilerBackend> Back
     std::scoped_lock Lock(Mutex);
     for (const TSharedPtr<Gpu::IProfilerBackend>& Existing : Backends)
     {
-        if (Existing && Existing->GetBackend() == Backend->GetBackend())
+        if (Existing && Existing->GetBackend() == backend->GetBackend())
         {
             return;
         }
     }
 
-    Backends.Add(Backend);
+    Backends.Add(backend);
 
 	// Query hardware metrics for stats display
-    Gpu::HardwareMetrics Metrics = Backend->QueryHardwareMetrics();
+    Gpu::HardwareMetrics Metrics = backend->QueryHardwareMetrics();
     SET_DWORD_STAT(STAT_GGPU_TotalComputeUnits, Metrics.mComputeUnitCount);
     SET_DWORD_STAT(STAT_GGPU_TotalWorkgroups, Metrics.mMaxWorkGroupSize);
     SET_MEMORY_STAT(STAT_GGPU_HardwareGlobalMemory, Metrics.mGlobalMemoryBytes);
 	SET_MEMORY_STAT(STAT_GGPU_HardwareLocalMemory, Metrics.mLocalMemoryBytes);
 }
 
-TSharedPtr<Gpu::IProfilerBackend> FGPUProfilerManager::FindBackend(Gpu::Backend Backend)
+TSharedPtr<Gpu::IProfilerBackend> FGPUProfilerManager::FindBackend(Gpu::Backend backend)
 {
     for (const TSharedPtr<Gpu::IProfilerBackend>& Candidate : Backends)
     {
-        if (Candidate && Candidate->GetBackend() == Backend)
+        if (Candidate && Candidate->GetBackend() == backend)
         {
             return Candidate;
         }
@@ -48,18 +48,18 @@ TSharedPtr<Gpu::IProfilerBackend> FGPUProfilerManager::FindBackend(Gpu::Backend 
     return nullptr;
 }
 
-void FGPUProfilerManager::EnqueueProfiledKernel(const Gpu::ProfiledKernelHandle& InHandle,
-                                                const Gpu::KernelDispatchInfo& DispatchInfo)
+void FGPUProfilerManager::EnqueueProfiledKernel(const Gpu::ProfiledKernelHandle& handle,
+                                                const Gpu::KernelDispatchInfo& info)
 {
     std::scoped_lock Lock(Mutex);
 
-    TSharedPtr<Gpu::IProfilerBackend> Backend = FindBackend(InHandle.Backend);
+    TSharedPtr<Gpu::IProfilerBackend> Backend = FindBackend(handle.mBackend);
     if (!Backend)
     {
         return;
     }
 
-    Gpu::ProfiledKernelHandle Handle = InHandle;
+    Gpu::ProfiledKernelHandle Handle = handle;
     if (!Backend->RetainProfiledHandle(Handle))
     {
         return;
@@ -67,9 +67,9 @@ void FGPUProfilerManager::EnqueueProfiledKernel(const Gpu::ProfiledKernelHandle&
 
     FActiveProfile Active;
     Active.Handle = Handle;
-    Active.Profile.Dispatch = DispatchInfo;
+    Active.Profile.mDispatch = info;
 
-    Backend->QueryKernelStaticInfo(Handle, Active.Profile.StaticInfo);
+    Backend->QueryKernelStaticInfo(Handle, Active.Profile.mStaticInfo);
 
     ActiveProfiles.Add(MoveTemp(Active));
 }
@@ -93,7 +93,7 @@ void FGPUProfilerManager::PollEvents()
     {
         FActiveProfile& Active = ActiveProfiles[i];
 
-        TSharedPtr<Gpu::IProfilerBackend> Backend = FindBackend(Active.Handle.Backend);
+        TSharedPtr<Gpu::IProfilerBackend> Backend = FindBackend(Active.Handle.mBackend);
         if (!Backend)
         {
             ActiveProfiles.RemoveAtSwap(i);
@@ -108,10 +108,10 @@ void FGPUProfilerManager::PollEvents()
         uint64 StartNs = 0;
         uint64 EndNs = 0;
 
-        Active.Profile.bComplete = true;
-        Active.Profile.bValidTiming = Backend->QueryTiming(Active.Handle, StartNs, EndNs);
-        Active.Profile.StartTimeNs = StartNs;
-        Active.Profile.EndTimeNs = EndNs;
+        Active.Profile.mIsComplete = true;
+        Active.Profile.mIsValidTiming = Backend->QueryTiming(Active.Handle, StartNs, EndNs);
+        Active.Profile.mStartTimeNs = StartNs;
+        Active.Profile.mEndTimeNs = EndNs;
 
         Backend->ReleaseProfiledHandle(Active.Handle);
 
@@ -138,12 +138,12 @@ void FGPUProfilerManager::UpdateStats()
     {
         TotalKernelTimeMs += Profile.GetDurationMs();
         TotalWorkGroups += Profile.GetWorkGroupCount();
-        TotalPrivateMemSize += Profile.StaticInfo.PrivateMemoryBytes;
-        TotalLocalMemSize += Profile.StaticInfo.LocalMemoryBytes;
-        TotalPreferredWorkGroupMultiple += Profile.StaticInfo.PreferredWorkGroupMultiple;
-        TotalCompiledWorkGroupSize[0] += Profile.StaticInfo.CompiledWorkGroupSize[0];
-        TotalCompiledWorkGroupSize[1] += Profile.StaticInfo.CompiledWorkGroupSize[1];
-        TotalCompiledWorkGroupSize[2] += Profile.StaticInfo.CompiledWorkGroupSize[2];
+        TotalPrivateMemSize += Profile.mStaticInfo.mPrivateMemoryBytes;
+        TotalLocalMemSize += Profile.mStaticInfo.mLocalMemoryBytes;
+        TotalPreferredWorkGroupMultiple += Profile.mStaticInfo.mPreferredWorkGroupMultiple;
+        TotalCompiledWorkGroupSize[0] += Profile.mStaticInfo.mCompiledWorkGroupSize[0];
+        TotalCompiledWorkGroupSize[1] += Profile.mStaticInfo.mCompiledWorkGroupSize[1];
+        TotalCompiledWorkGroupSize[2] += Profile.mStaticInfo.mCompiledWorkGroupSize[2];
     }
 
     SET_FLOAT_STAT(STAT_GGPU_KernelTimeMs, TotalKernelTimeMs);

@@ -174,7 +174,7 @@ struct AsyncMappedTransferState
                         size_t offset)
     {
         OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
-        if (!_queue || !src || offset + bytes > mDescription.SizeBytes)
+        if (!_queue || !src || offset + bytes > mDescription.mSizeBytes)
         {
             return false;
         }
@@ -253,7 +253,7 @@ struct AsyncMappedTransferState
                           size_t offset)
     {
         OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
-        if (!_queue || !mpMemObject || !dst || offset + bytes > mDescription.SizeBytes)
+        if (!_queue || !mpMemObject || !dst || offset + bytes > mDescription.mSizeBytes)
         {
             return false;
         }
@@ -340,7 +340,7 @@ struct AsyncMappedTransferState
                                                 size_t offset)
 	{
         OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
-        if (!_queue || !src || offset + bytes > mDescription.SizeBytes)
+        if (!_queue || !src || offset + bytes > mDescription.mSizeBytes)
         {
             return nullptr;
         }
@@ -457,7 +457,7 @@ struct AsyncMappedTransferState
                                                   size_t offset)
 	{
         OpenCL::Queue* _queue = reinterpret_cast<OpenCL::Queue*>(&queue);
-        if (!_queue || !dst || offset + bytes > mDescription.SizeBytes)
+        if (!_queue || !dst || offset + bytes > mDescription.mSizeBytes)
         {
             return nullptr;
         }
@@ -592,7 +592,7 @@ struct AsyncMappedTransferState
                             reinterpret_cast<OpenCL::Buffer*>(&buffer)->GetCLMem(),
                             0,
                             0,
-                            mDescription.SizeBytes,
+                            mDescription.mSizeBytes,
                             0,
                             nullptr,
                             nullptr);
@@ -607,7 +607,7 @@ struct AsyncMappedTransferState
         bool usedFallback = false;
         mResolvedSyncMode = ResolveSyncMode(usedFallback);
 
-        cl_mem_flags flags = ToCLMemFlags(mDescription.AccessMode);
+        cl_mem_flags flags = ToCLMemFlags(mDescription.mAccessMode);
 
 		std::shared_ptr<Context> context = mpContext.lock();
 
@@ -618,23 +618,23 @@ struct AsyncMappedTransferState
                 flags |= CL_MEM_COPY_HOST_PTR;
                 mpMemObject = CreateBuffer(context->GetCLContext(),
                                            flags,
-                                           mDescription.InitialData,
-                                           mDescription.SizeBytes);
+                                           mDescription.mpInitialData,
+                                           mDescription.mSizeBytes);
 
                 mResolvedMemoryModel = ResolvedMemoryModel::CLBuffer;
                 break;
             }
             case BufferSyncMode::Stream:
             {
-                if (mDescription.InitialData)
+                if (mDescription.mpInitialData)
                 {
                     flags |= CL_MEM_COPY_HOST_PTR;
                 }
 
                 mpMemObject = CreateBuffer(context->GetCLContext(),
                                            flags,
-                                           mDescription.InitialData,
-                                           mDescription.SizeBytes);
+                                           mDescription.mpInitialData,
+                                           mDescription.mSizeBytes);
 
                 mResolvedMemoryModel = ResolvedMemoryModel::CLBuffer;
                 break;
@@ -643,15 +643,15 @@ struct AsyncMappedTransferState
             {
                 mpSVM = clSVMAlloc(context->GetCLContext(),
                                    CL_MEM_READ_WRITE,
-                                   mDescription.SizeBytes,
+                                   mDescription.mSizeBytes,
                                    0);
 
-                if (mpSVM && mDescription.InitialData)
+                if (mpSVM && mDescription.mpInitialData)
                 {
                     std::shared_ptr<Gpu::IQueue> initQueue = context->CreateQueue();
                     Upload(*initQueue,
-                           mDescription.InitialData,
-                           mDescription.SizeBytes,
+                           mDescription.mpInitialData,
+                           mDescription.mSizeBytes,
                            0);
                 }
 
@@ -697,10 +697,10 @@ struct AsyncMappedTransferState
 
         bOutUsingFallback = false;
 
-        BufferSyncMode requested = mDescription.SyncMode;
+        BufferSyncMode requested = mDescription.mSyncMode;
         if (requested == BufferSyncMode::Auto)
         {
-            switch (mDescription.Usage)
+            switch (mDescription.mUsage)
             {
                 case MemoryUsage::Shared:
                 {
@@ -716,7 +716,7 @@ struct AsyncMappedTransferState
                 case MemoryUsage::Default:
                 default:
                 {
-                    requested = mDescription.InitialData ? BufferSyncMode::CopyOnce : BufferSyncMode::Stream;
+                    requested = mDescription.mpInitialData ? BufferSyncMode::CopyOnce : BufferSyncMode::Stream;
                     break;
                 }
             }
@@ -727,7 +727,7 @@ struct AsyncMappedTransferState
             const bool bSupportsSVM = device && device->GetCapabilities().mSVMSupport != SVMSupport::None;
             if (!bSupportsSVM)
             {
-                if (!mDescription.AllowBackendFallback)
+                if (!mDescription.mAllowBackendFallback)
                 {
                     return BufferSyncMode::ZeroCopy;
                 }

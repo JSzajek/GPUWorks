@@ -23,19 +23,19 @@ namespace Gpu
 
     std::shared_ptr<ICore> Factory::Create(const FactoryDesc& desc)
     {
-        if (auto core = Create(desc.PreferredBackend))
+        if (auto core = Create(desc.mPreferredBackend))
         {
             return core;
         }
 
-        if (!desc.bAllowFallback)
+        if (!desc.mAllowFallback)
         {
             return nullptr;
         }
 
         for (Backend backend : GetAvailableBackends())
         {
-            if (backend == desc.PreferredBackend)
+            if (backend == desc.mPreferredBackend)
             {
                 continue;
             }

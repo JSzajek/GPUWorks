@@ -321,12 +321,12 @@ bool UGPUWorksLibrary::RunProgram(UGPUProgramObject* program,
 	std::shared_ptr<Gpu::IQueue> queue = mpGlobalGPUContext->GetDefaultQueue();
 
 	Gpu::DispatchDescription dispatchDesc;
-	dispatchDesc.Dim = dimensions;
+	dispatchDesc.mDim = dimensions;
 
 	uint32_t cnt = FMath::Min((uint32_t)dimensions, 3u);
 	for (uint32_t i = 0; i < cnt; ++i)
 	{
-		dispatchDesc.Global[i] = workCount[i];
+		dispatchDesc.mGlobal[i] = workCount[i];
 	}
 	
 	std::shared_ptr<Gpu::IEvent> event = queue->Dispatch(*program->GetKernel(), dispatchDesc);

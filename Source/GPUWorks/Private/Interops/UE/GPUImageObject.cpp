@@ -21,30 +21,30 @@ struct FGPUTexture2DAsyncUpdate
 	std::function<void(bool)> mCompletionCallback;
 };
 
-bool UGPUImageObject::CreateImage2D(UGPUContextObject* ContextObject,
-									int32 Width,
-									int32 Height,
-									EGpuPixelFormat Format,
-									bool bReadOnly,
-									bool bWriteOnly)
+bool UGPUImageObject::CreateImage2D(UGPUContextObject* contextObject,
+									int32 width,
+									int32 height,
+									EGpuPixelFormat format,
+									bool readOnly,
+									bool writeOnly)
 {
-	if (!ContextObject || !ContextObject->GetContext() || Width <= 0 || Height <= 0)
+	if (!contextObject || !contextObject->GetContext() || width <= 0 || height <= 0)
 	{
 		return false;
 	}
 
 	Gpu::ImageDescription Desc;
 	Desc.Type = Gpu::ImageType::Tex2D;
-	Desc.Format = ToNativePixelFormat(Format);
-	Desc.Width = static_cast<uint32>(Width);
-	Desc.Height = static_cast<uint32>(Height);
+	Desc.Format = ToNativePixelFormat(format);
+	Desc.Width = static_cast<uint32>(width);
+	Desc.Height = static_cast<uint32>(height);
 	Desc.DepthOrLayers = 1;
 
-	if (bReadOnly)
+	if (readOnly)
 	{
 		Desc.AccessMode = Gpu::Access::ReadOnly;
 	}
-	else if (bWriteOnly)
+	else if (writeOnly)
 	{
 		Desc.AccessMode = Gpu::Access::WriteOnly;
 	}
@@ -53,35 +53,35 @@ bool UGPUImageObject::CreateImage2D(UGPUContextObject* ContextObject,
 		Desc.AccessMode = Gpu::Access::ReadWrite;
 	}
 
-	Image = ContextObject->GetContext()->CreateImage(Desc);
-	return Image != nullptr;
+	mpImage = contextObject->GetContext()->CreateImage(Desc);
+	return mpImage != nullptr;
 }
 
-bool UGPUImageObject::CreateImage2DArray(UGPUContextObject* ContextObject,
-										 int32 Width,
-										 int32 Height,
-										 int32 Layers,
-										 EGpuPixelFormat Format,
-										 bool bReadOnly,
-										 bool bWriteOnly)
+bool UGPUImageObject::CreateImage2DArray(UGPUContextObject* contextObject,
+										 int32 width,
+										 int32 height,
+										 int32 layers,
+										 EGpuPixelFormat format,
+										 bool readOnly,
+										 bool writeOnly)
 {
-	if (!ContextObject || !ContextObject->GetContext() || Width <= 0 || Height <= 0 || Layers <= 0)
+	if (!contextObject || !contextObject->GetContext() || width <= 0 || height <= 0 || layers <= 0)
 	{
 		return false;
 	}
 
 	Gpu::ImageDescription Desc;
 	Desc.Type = Gpu::ImageType::Tex2DArray;
-	Desc.Format = ToNativePixelFormat(Format);
-	Desc.Width = static_cast<uint32>(Width);
-	Desc.Height = static_cast<uint32>(Height);
-	Desc.DepthOrLayers = static_cast<uint32>(Layers);
+	Desc.Format = ToNativePixelFormat(format);
+	Desc.Width = static_cast<uint32>(width);
+	Desc.Height = static_cast<uint32>(height);
+	Desc.DepthOrLayers = static_cast<uint32>(layers);
 
-	if (bReadOnly)
+	if (readOnly)
 	{
 		Desc.AccessMode = Gpu::Access::ReadOnly;
 	}
-	else if (bWriteOnly)
+	else if (writeOnly)
 	{
 		Desc.AccessMode = Gpu::Access::WriteOnly;
 	}
@@ -90,35 +90,35 @@ bool UGPUImageObject::CreateImage2DArray(UGPUContextObject* ContextObject,
 		Desc.AccessMode = Gpu::Access::ReadWrite;
 	}
 
-	Image = ContextObject->GetContext()->CreateImage(Desc);
-	return Image != nullptr;
+	mpImage = contextObject->GetContext()->CreateImage(Desc);
+	return mpImage != nullptr;
 }
 
-bool UGPUImageObject::CreateImage3D(UGPUContextObject* ContextObject,
-									int32 Width,
-									int32 Height,
-									int32 Depth,
-									EGpuPixelFormat Format,
-									bool bReadOnly,
-									bool bWriteOnly)
+bool UGPUImageObject::CreateImage3D(UGPUContextObject* contextObject,
+									int32 width,
+									int32 height,
+									int32 depth,
+									EGpuPixelFormat format,
+									bool readOnly,
+									bool writeOnly)
 {
-	if (!ContextObject || !ContextObject->GetContext() || Width <= 0 || Height <= 0 || Depth <= 0)
+	if (!contextObject || !contextObject->GetContext() || width <= 0 || height <= 0 || depth <= 0)
 	{
 		return false;
 	}
 
 	Gpu::ImageDescription Desc;
 	Desc.Type = Gpu::ImageType::Tex3D;
-	Desc.Format = ToNativePixelFormat(Format);
-	Desc.Width = static_cast<uint32>(Width);
-	Desc.Height = static_cast<uint32>(Height);
-	Desc.DepthOrLayers = static_cast<uint32>(Depth);
+	Desc.Format = ToNativePixelFormat(format);
+	Desc.Width = static_cast<uint32>(width);
+	Desc.Height = static_cast<uint32>(height);
+	Desc.DepthOrLayers = static_cast<uint32>(depth);
 
-	if (bReadOnly)
+	if (readOnly)
 	{
 		Desc.AccessMode = Gpu::Access::ReadOnly;
 	}
-	else if (bWriteOnly)
+	else if (writeOnly)
 	{
 		Desc.AccessMode = Gpu::Access::WriteOnly;
 	}
@@ -127,38 +127,38 @@ bool UGPUImageObject::CreateImage3D(UGPUContextObject* ContextObject,
 		Desc.AccessMode = Gpu::Access::ReadWrite;
 	}
 
-	Image = ContextObject->GetContext()->CreateImage(Desc);
-	return Image != nullptr;
+	mpImage = contextObject->GetContext()->CreateImage(Desc);
+	return mpImage != nullptr;
 }
 
 bool UGPUImageObject::IsValidImage() const
 {
-	return Image != nullptr;
+	return mpImage != nullptr;
 }
 
 int32 UGPUImageObject::GetWidth() const
 {
-	return Image ? static_cast<int32>(Image->GetWidth()) : 0;
+	return mpImage ? static_cast<int32>(mpImage->GetWidth()) : 0;
 }
 
 int32 UGPUImageObject::GetHeight() const
 {
-	return Image ? static_cast<int32>(Image->GetHeight()) : 0;
+	return mpImage ? static_cast<int32>(mpImage->GetHeight()) : 0;
 }
 
 int32 UGPUImageObject::GetDepthOrLayers() const
 {
-	return Image ? static_cast<int32>(Image->GetDepthOrLayers()) : 0;
+	return mpImage ? static_cast<int32>(mpImage->GetDepthOrLayers()) : 0;
 }
 
 EGpuImageType UGPUImageObject::GetImageType() const
 {
-	return Image ? FromNativeImageType(Image->GetType()) : EGpuImageType::Tex2D;
+	return mpImage ? FromNativeImageType(mpImage->GetType()) : EGpuImageType::Tex2D;
 }
 
 EGpuPixelFormat UGPUImageObject::GetPixelFormat() const
 {
-	return Image ? FromNativePixelFormat(Image->GetFormat()) : EGpuPixelFormat::Unknown;
+	return mpImage ? FromNativePixelFormat(mpImage->GetFormat()) : EGpuPixelFormat::Unknown;
 }
 
 bool UGPUImageObject::UploadBytes(UGPUContextObject* ContextObject,
@@ -169,84 +169,84 @@ bool UGPUImageObject::UploadBytes(UGPUContextObject* ContextObject,
         return false;
     }
 
-    const size_t Bpp = GetBytesPerPixel(Image->GetFormat());
+    const size_t Bpp = GetBytesPerPixel(mpImage->GetFormat());
     if (Bpp == 0)
     {
         return false;
     }
 
 	Gpu::ImageRegion Region;
-    switch (Image->GetType())
+    switch (mpImage->GetType())
     {
 		case Gpu::ImageType::Tex2D:
 		{
-			Region = {0, 0, 0, Image->GetWidth(), Image->GetHeight(), 1};
+			Region = {0, 0, 0, mpImage->GetWidth(), mpImage->GetHeight(), 1};
 			break;
 		}
 		case Gpu::ImageType::Tex2DArray:
 		case Gpu::ImageType::Tex3D:
 		{
-			Region = {0, 0, 0, Image->GetWidth(), Image->GetHeight(), Image->GetDepthOrLayers()};
+			Region = {0, 0, 0, mpImage->GetWidth(), mpImage->GetHeight(), mpImage->GetDepthOrLayers()};
 			break;
 		}
 		default:
 			return false;
     }
 
-    return Image->Upload(*ContextObject->GetDefaultQueue(),
+    return mpImage->Upload(*ContextObject->GetDefaultQueue(),
 						 Bytes.GetData(),
 						 static_cast<size_t>(Bytes.Num()),
 						 Region);
 }
 
-bool UGPUImageObject::DownloadBytes(UGPUContextObject* ContextObject,
-									TArray<uint8>& OutBytes)
+bool UGPUImageObject::DownloadBytes(UGPUContextObject* contextObject,
+									TArray<uint8>& bytes)
 {
-	TArray64<uint8> Temp;
-	if (!DownloadToCpuBytes(ContextObject, Temp))
+	TArray64<uint8> temp;
+	if (!DownloadToCpuBytes(contextObject, temp))
 	{
 		return false;
 	}
 
-	OutBytes.SetNumUninitialized(static_cast<int32>(Temp.Num()));
-	FMemory::Memcpy(OutBytes.GetData(), Temp.GetData(), Temp.Num());
+	bytes.SetNumUninitialized(static_cast<int32>(temp.Num()));
+	FMemory::Memcpy(bytes.GetData(), temp.GetData(), temp.Num());
 	return true;
 }
 
-bool UGPUImageObject::FillColor(UGPUContextObject* ContextObject,
+bool UGPUImageObject::FillColor(UGPUContextObject* contextObject,
 								const FColor& color)
 {
-	if (!ValidateContextAndQueue(ContextObject))
+	if (!ValidateContextAndQueue(contextObject))
 	{
 		return false;
 	}
-	const size_t Bpp = GetBytesPerPixel(Image->GetFormat());
+	const size_t Bpp = GetBytesPerPixel(mpImage->GetFormat());
 	if (Bpp == 0)
 	{
 		return false;
 	}
 
-	Gpu::ImageRegion Region;
-	switch (Image->GetType())
+	Gpu::ImageRegion region;
+	switch (mpImage->GetType())
 	{
 		case Gpu::ImageType::Tex2D:
 		{
-			Region = { 0, 0, 0, Image->GetWidth(), Image->GetHeight(), 1 };
+			region = { 0, 0, 0, mpImage->GetWidth(), mpImage->GetHeight(), 1 };
 			break;
 		}
 		case Gpu::ImageType::Tex2DArray:
 		case Gpu::ImageType::Tex3D:
 		{
-			Region = { 0, 0, 0, Image->GetWidth(), Image->GetHeight(), Image->GetDepthOrLayers() };
+			region = { 0, 0, 0, mpImage->GetWidth(), mpImage->GetHeight(), mpImage->GetDepthOrLayers() };
 			break;
 		}
 		default:
 			return false;
 	}
 
-	const uint32_t channelCount = GetChannelCount(Image->GetFormat());
+	const uint32_t channelCount = GetChannelCount(mpImage->GetFormat());
 	std::vector<uint8_t> colorData;
-	for (uint8_t i = 0; i < GetChannelCount(Image->GetFormat()); ++i)
+	for (uint8_t i = 0; i < GetChannelCount(mpImage->GetFormat()); ++i)
 	{
 		uint8_t channelValue = 0;
 		switch (i)
@@ -269,392 +269,389 @@ bool UGPUImageObject::FillColor(UGPUContextObject* ContextObject,
 		colorData.push_back(channelValue);
 	}
 
-	return Image->Fill(*ContextObject->GetDefaultQueue(),
-					   colorData.data(),
-					   channelCount * sizeof(uint8_t),
-					   Region);
+	return mpImage->Fill(*contextObject->GetDefaultQueue(),
+						 colorData.data(),
+						 channelCount * sizeof(uint8_t),
+						 region);
 }
 
-UTexture2D* UGPUImageObject::CreateTexture2D(UGPUContextObject* ContextObject,
-											 bool bSRGB,
-											 bool bGenerateMips)
+UTexture2D* UGPUImageObject::CreateTexture2D(UGPUContextObject* contextObject,
+											 bool isSRGB,
+											 bool generateMips)
 {
 	check(IsInGameThread());
 
-	if (!ValidateContextAndQueue(ContextObject) || Image->GetType() != Gpu::ImageType::Tex2D)
+	if (!ValidateContextAndQueue(contextObject) || mpImage->GetType() != Gpu::ImageType::Tex2D)
 	{
 		return nullptr;
 	}
 
-	const EPixelFormat UEFormat = ToUEPixelFormat(Image->GetFormat());
-	const size_t Bpp = GetBytesPerPixel(Image->GetFormat());
-	if (UEFormat == PF_Unknown)
+	const EPixelFormat format = ToUEPixelFormat(mpImage->GetFormat());
+	const size_t bpp = GetBytesPerPixel(mpImage->GetFormat());
+	if (format == PF_Unknown)
 	{
 		return nullptr;
 	}
 
-	TArray64<uint8> BaseBytes;
-	std::vector<RenderUtils::Mip> Mips;
-	if (!DownloadAndBuildMips(ContextObject, bGenerateMips, BaseBytes, Mips))
+	TArray64<uint8> bytes;
+	std::vector<RenderUtils::Mip> mips;
+	if (!DownloadAndBuildMips(contextObject, generateMips, bytes, mips))
 	{
 		return nullptr;
 	}
 
-	UTexture2D* Texture = UTexture2D::CreateTransient(static_cast<int32>(Image->GetWidth()),
-													  static_cast<int32>(Image->GetHeight()),
-													  UEFormat);
+	UTexture2D* texture = UTexture2D::CreateTransient(static_cast<int32>(mpImage->GetWidth()),
+													  static_cast<int32>(mpImage->GetHeight()),
+													  format);
 
-	if (!Texture)
+	if (!texture)
 	{
-		FreeGeneratedMipChain(Mips);
+		FreeGeneratedMipChain(mips);
 		return nullptr;
 	}
 
-	Texture->NeverStream = true;
-	Texture->SRGB = bSRGB;
-	Texture->MipGenSettings = bGenerateMips ? TMGS_FromTextureGroup : TMGS_NoMipmaps;
+	texture->NeverStream = true;
+	texture->SRGB = isSRGB;
+	texture->MipGenSettings = generateMips ? TMGS_FromTextureGroup : TMGS_NoMipmaps;
 
-	Texture->SetPlatformData(new FTexturePlatformData());
+	texture->SetPlatformData(new FTexturePlatformData());
 
-	const bool bFilled = FillPlatformDataFromMips(Texture->GetPlatformData(),
-												  UEFormat,
-												  Mips,
-												  Bpp,
-												  Image->GetWidth(),
-												  Image->GetHeight(),
-												  1);
+	const bool filled = FillPlatformDataFromMips(texture->GetPlatformData(),
+												 format,
+												 mips,
+												 bpp,
+												 mpImage->GetWidth(),
+												 mpImage->GetHeight(),
+												 1);
 
-	FreeGeneratedMipChain(Mips);
+	FreeGeneratedMipChain(mips);
 
-	if (!bFilled)
+	if (!filled)
 	{
 		return nullptr;
 	}
 
-	Texture->UpdateResource();
-	return Texture;
+	texture->UpdateResource();
+	return texture;
 }
 
-UTextureRenderTarget2D* UGPUImageObject::CreateAndWriteRenderTarget2D(UGPUContextObject* ContextObject,
-																	  FLinearColor ClearColor,
-																	  bool bSRGB,
-																	  bool bGenerateMips)
+UTextureRenderTarget2D* UGPUImageObject::CreateAndWriteRenderTarget2D(UGPUContextObject* contextObject,
+																	  FLinearColor clearColor,
+																	  bool isSRGB,
+																	  bool generateMips)
 {
-	if (!ValidateContextAndQueue(ContextObject) || Image->GetType() != Gpu::ImageType::Tex2D)
+	if (!ValidateContextAndQueue(contextObject) || mpImage->GetType() != Gpu::ImageType::Tex2D)
 	{
 		return nullptr;
 	}
 
-	const ETextureRenderTargetFormat UEFormat = ToUERenderTargetPixelFormat(Image->GetFormat());
-	if (UEFormat == -1)
+	const ETextureRenderTargetFormat format = ToUERenderTargetPixelFormat(mpImage->GetFormat());
+	if (format == -1)
 	{
 		return nullptr;
 	}
 
-	TObjectPtr<UTextureRenderTarget2D> Texture = NewObject<UTextureRenderTarget2D>(GetTransientPackage(),
+	TObjectPtr<UTextureRenderTarget2D> texture = NewObject<UTextureRenderTarget2D>(GetTransientPackage(),
 																				   NAME_None,
 																				   RF_Transient);
 
-	if (!Texture)
+	if (!texture)
 	{
 		return nullptr;
 	}
 
-	Texture->RenderTargetFormat = UEFormat;
-	Texture->ClearColor = ClearColor;
-	Texture->bAutoGenerateMips = false;
-	Texture->bCanCreateUAV = true;
-	Texture->InitAutoFormat(static_cast<int32>(Image->GetWidth()), static_cast<int32>(Image->GetHeight()));
-	Texture->UpdateResourceImmediate(true);
+	texture->RenderTargetFormat = format;
+	texture->ClearColor = clearColor;
+	texture->bAutoGenerateMips = false;
+	texture->bCanCreateUAV = true;
+	texture->InitAutoFormat(static_cast<int32>(mpImage->GetWidth()), static_cast<int32>(mpImage->GetHeight()));
+	texture->UpdateResourceImmediate(true);
 
-	UTexture2D* temp = CreateTexture2D(ContextObject, bSRGB, bGenerateMips);
-
-	if (!RenderUtils::BlitTextureToRenderTarget_Immediate(temp, Texture))
+	UTexture2D* temp = CreateTexture2D(contextObject, isSRGB, generateMips);
+	if (!RenderUtils::BlitTextureToRenderTarget_Immediate(temp, texture))
 	{
 		return nullptr;
 	}
-	return Texture;
+	return texture;
 }
 
-UTexture2DArray* UGPUImageObject::CreateTexture2DArray(UGPUContextObject* ContextObject,
-													   bool bSRGB,
-													   bool bGenerateMips)
+UTexture2DArray* UGPUImageObject::CreateTexture2DArray(UGPUContextObject* contextObject,
+													   bool isSRGB,
+													   bool generateMips)
 {
-	if (!ValidateContextAndQueue(ContextObject) || Image->GetType() != Gpu::ImageType::Tex2DArray)
+	if (!ValidateContextAndQueue(contextObject) || mpImage->GetType() != Gpu::ImageType::Tex2DArray)
     {
         return nullptr;
     }
 
-	const EPixelFormat UEFormat = ToUEPixelFormat(Image->GetFormat());
-	const size_t Bpp = GetBytesPerPixel(Image->GetFormat());
-    if (UEFormat == PF_Unknown)
+	const EPixelFormat format = ToUEPixelFormat(mpImage->GetFormat());
+	const size_t bpp = GetBytesPerPixel(mpImage->GetFormat());
+    if (format == PF_Unknown)
     {
         return nullptr;
     }
 
-	TArray64<uint8> BaseBytes;
-	std::vector<RenderUtils::Mip> Mips;
-	if (!DownloadAndBuildMips(ContextObject, bGenerateMips, BaseBytes, Mips))
+	TArray64<uint8> bytes;
+	std::vector<RenderUtils::Mip> mips;
+	if (!DownloadAndBuildMips(contextObject, generateMips, bytes, mips))
 	{
 		return nullptr;
 	}
 
-    UTexture2DArray* Texture = NewObject<UTexture2DArray>(GetTransientPackage(), NAME_None, RF_Transient);
-    if (!Texture)
+    UTexture2DArray* texture = NewObject<UTexture2DArray>(GetTransientPackage(), NAME_None, RF_Transient);
+    if (!texture)
     {
-		FreeGeneratedMipChain(Mips);
+		FreeGeneratedMipChain(mips);
         return nullptr;
     }
 
-    Texture->NeverStream = true;
-    Texture->SRGB = bSRGB;
-	Texture->MipGenSettings = bGenerateMips ? TMGS_FromTextureGroup : TMGS_NoMipmaps;
+    texture->NeverStream = true;
+    texture->SRGB = isSRGB;
+	texture->MipGenSettings = generateMips ? TMGS_FromTextureGroup : TMGS_NoMipmaps;
 
-    Texture->SetPlatformData(new FTexturePlatformData());
+    texture->SetPlatformData(new FTexturePlatformData());
 
-	const bool bFilled = FillPlatformDataFromMips(Texture->GetPlatformData(),
-												  UEFormat,
-												  Mips,
-												  Bpp,
-												  Image->GetWidth(),
-												  Image->GetHeight(),
-												  Image->GetDepthOrLayers());
+	const bool filled = FillPlatformDataFromMips(texture->GetPlatformData(),
+												 format,
+												 mips,
+												 bpp,
+												 mpImage->GetWidth(),
+												 mpImage->GetHeight(),
+												 mpImage->GetDepthOrLayers());
 
-	FreeGeneratedMipChain(Mips);
+	FreeGeneratedMipChain(mips);
 
-	if (!bFilled)
+	if (!filled)
 	{
 		return nullptr;
 	}
 
-	Texture->UpdateResource();
-	return Texture;
+	texture->UpdateResource();
+	return texture;
 }
 
-UVolumeTexture* UGPUImageObject::CreateVolumeTexture(UGPUContextObject* ContextObject,
-													 bool bSRGB,
-													 bool bGenerateMips)
+UVolumeTexture* UGPUImageObject::CreateVolumeTexture(UGPUContextObject* contextObject,
+													 bool isSRGB,
+													 bool generateMips)
 {
-	if (!ValidateContextAndQueue(ContextObject) || Image->GetType() != Gpu::ImageType::Tex3D)
+	if (!ValidateContextAndQueue(contextObject) || mpImage->GetType() != Gpu::ImageType::Tex3D)
 	{
 		return nullptr;
 	}
 
-	const EPixelFormat UEFormat = ToUEPixelFormat(Image->GetFormat());
-	const size_t Bpp = GetBytesPerPixel(Image->GetFormat());
-	if (UEFormat == PF_Unknown)
+	const EPixelFormat format = ToUEPixelFormat(mpImage->GetFormat());
+	const size_t bpp = GetBytesPerPixel(mpImage->GetFormat());
+	if (format == PF_Unknown)
 	{
 		return nullptr;
 	}
 
-	TArray64<uint8> BaseBytes;
-	std::vector<RenderUtils::Mip> Mips;
-	if (!DownloadAndBuildMips(ContextObject, bGenerateMips, BaseBytes, Mips))
+	TArray64<uint8> bytes;
+	std::vector<RenderUtils::Mip> mips;
+	if (!DownloadAndBuildMips(contextObject, generateMips, bytes, mips))
 	{
 		return nullptr;
 	}
 
-	UVolumeTexture* Texture = NewObject<UVolumeTexture>(GetTransientPackage(),
+	UVolumeTexture* texture = NewObject<UVolumeTexture>(GetTransientPackage(),
 														NAME_None,
 														RF_Transient);
-	if (!Texture)
+	if (!texture)
 	{
-		FreeGeneratedMipChain(Mips);
+		FreeGeneratedMipChain(mips);
 		return nullptr;
 	}
 
-	Texture->NeverStream = true;
-	Texture->SRGB = bSRGB;
-	Texture->MipGenSettings = bGenerateMips ? TMGS_FromTextureGroup : TMGS_NoMipmaps;
-	Texture->SetPlatformData(new FTexturePlatformData());
+	texture->NeverStream = true;
+	texture->SRGB = isSRGB;
+	texture->MipGenSettings = generateMips ? TMGS_FromTextureGroup : TMGS_NoMipmaps;
+	texture->SetPlatformData(new FTexturePlatformData());
 
-	const bool bFilled = FillPlatformDataFromMips(Texture->GetPlatformData(),
-												  UEFormat,
-												  Mips,
-												  Bpp,
-												  Image->GetWidth(),
-												  Image->GetHeight(),
-												  Image->GetDepthOrLayers());
+	const bool filled = FillPlatformDataFromMips(texture->GetPlatformData(),
+												 format,
+												 mips,
+												 bpp,
+												 mpImage->GetWidth(),
+												 mpImage->GetHeight(),
+												 mpImage->GetDepthOrLayers());
 
-	FreeGeneratedMipChain(Mips);
+	FreeGeneratedMipChain(mips);
 
-	if (!bFilled)
+	if (!filled)
 	{
 		return nullptr;
 	}
 
-	Texture->UpdateResource();
-	return Texture;
+	texture->UpdateResource();
+	return texture;
 }
 
-bool UGPUImageObject::WriteToRenderTarget2D(UGPUContextObject* ContextObject,
-											UTextureRenderTarget2D* Output)
+bool UGPUImageObject::WriteToRenderTarget2D(UGPUContextObject* contextObject,
+											UTextureRenderTarget2D* output)
 {
-	bool isSRGB = Output->IsSRGB();
-	UTexture2D* temp = CreateTexture2D(ContextObject, isSRGB, false);
+	bool isSRGB = output->IsSRGB();
+	UTexture2D* temp = CreateTexture2D(contextObject, isSRGB, false);
 
-	TObjectPtr<UTextureRenderTarget2D> Texture(Output);
-	if (!RenderUtils::BlitTextureToRenderTarget_Immediate(temp, Texture))
+	TObjectPtr<UTextureRenderTarget2D> texture(output);
+	if (!RenderUtils::BlitTextureToRenderTarget_Immediate(temp, texture))
 	{
 		return false;
 	}
 	return true;
 }
 
-bool UGPUImageObject::UpdateTexture2D(UGPUContextObject* ContextObject,
-									  UTexture2D* Texture)
+bool UGPUImageObject::UpdateTexture2D(UGPUContextObject* contextObject,
+									  UTexture2D* texture)
 {
-	if (!ValidateContextAndQueue(ContextObject) ||
-		!Texture ||
-		!Texture->GetPlatformData() ||
-		Image->GetType() != Gpu::ImageType::Tex2D)
+	if (!ValidateContextAndQueue(contextObject) ||
+		!texture ||
+		!texture->GetPlatformData() ||
+		mpImage->GetType() != Gpu::ImageType::Tex2D)
 	{
 		return false;
 	}
 
-	const bool generateMips = Texture->MipGenSettings != TMGS_NoMipmaps;
-	if (UpdateTexture_Internal(Texture->GetPlatformData(), ContextObject, generateMips))
+	const bool generateMips = texture->MipGenSettings != TMGS_NoMipmaps;
+	if (UpdateTexture_Internal(texture->GetPlatformData(), contextObject, generateMips))
 	{
-		Texture->UpdateResource();
+		texture->UpdateResource();
 		return true;
 	}
 	return false;
 }
 
-bool UGPUImageObject::UpdateTexture2DAsync(UGPUContextObject* ContextObject,
-										   UTexture2D* Texture,
-										   const std::function<void(bool)>& CompletionCallback,
-										   ENamedThreads::Type CallbackThread)
+bool UGPUImageObject::UpdateTexture2DAsync(UGPUContextObject* contextObject,
+										   UTexture2D* texture,
+										   const std::function<void(bool)>& completionCallback,
+										   ENamedThreads::Type callbackThread)
 {
-	if (!ValidateContextAndQueue(ContextObject) ||
-		!Texture ||
-		Image->GetType() != Gpu::ImageType::Tex2D)
+	if (!ValidateContextAndQueue(contextObject) ||
+		!texture ||
+		mpImage->GetType() != Gpu::ImageType::Tex2D)
 	{
-		if (CompletionCallback)
+		if (completionCallback)
 		{
-			CompletionCallback(false);
+			completionCallback(false);
 		}
 		return false;
 	}
 
-	const EPixelFormat UEFormat = ToUEPixelFormat(Image->GetFormat());
-	const size_t Bpp = GetBytesPerPixel(Image->GetFormat());
+	const EPixelFormat format = ToUEPixelFormat(mpImage->GetFormat());
+	const size_t bpp = GetBytesPerPixel(mpImage->GetFormat());
 
-	if (UEFormat == PF_Unknown || Bpp == 0)
+	if (format == PF_Unknown || bpp == 0)
 	{
-		AsyncTask(CallbackThread, [CompletionCallback]()
+		AsyncTask(callbackThread, [completionCallback]()
 		{
-			if (CompletionCallback)
+			if (completionCallback)
 			{
-				CompletionCallback(false);
+				completionCallback(false);
 			}
 		});
 		return false;
 	}
 
-	FTexturePlatformData* PlatformData = Texture->GetPlatformData();
-
-	if (PlatformData->SizeX != static_cast<int32>(Image->GetWidth()) ||
-		PlatformData->SizeY != static_cast<int32>(Image->GetHeight()) ||
-		PlatformData->PixelFormat != UEFormat)
+	FTexturePlatformData* platformData = texture->GetPlatformData();
+	if (platformData->SizeX != static_cast<int32>(mpImage->GetWidth()) ||
+		platformData->SizeY != static_cast<int32>(mpImage->GetHeight()) ||
+		platformData->PixelFormat != format)
 	{
-		AsyncTask(CallbackThread, [CompletionCallback]()
+		AsyncTask(callbackThread, [completionCallback]()
 		{
-			if (CompletionCallback)
+			if (completionCallback)
 			{
-				CompletionCallback(false);
+				completionCallback(false);
 			}
 		});
 		return false;
 	}
 
-	const uint32 Width = Image->GetWidth();
-	const uint32 Height = Image->GetHeight();
+	const uint32 width = mpImage->GetWidth();
+	const uint32 height = mpImage->GetHeight();
 
-	const size_t TotalBytes = static_cast<size_t>(Width) *
-							  static_cast<size_t>(Height) *
-							  Bpp;
+	const size_t totalBytes = static_cast<size_t>(width) *
+							  static_cast<size_t>(height) *
+							  bpp;
 
-	auto State = MakeShared<FGPUTexture2DAsyncUpdate>();
-	State->mpTexture = Texture;
-	State->mBaseBytes.resize(TotalBytes, 0);
-	State->mCompletionCallback = std::move(CompletionCallback);
+	TSharedPtr<FGPUTexture2DAsyncUpdate> state = MakeShared<FGPUTexture2DAsyncUpdate>();
+	state->mpTexture = texture;
+	state->mBaseBytes.resize(totalBytes, 0);
+	state->mCompletionCallback = std::move(completionCallback);
 
-	Gpu::ImageRegion Region;
-	Region.X = 0;
-	Region.Y = 0;
-	Region.Z = 0;
-	Region.Width = Width;
-	Region.Height = Height;
-	Region.Depth = 1;
+	Gpu::ImageRegion region;
+	region.X = 0;
+	region.Y = 0;
+	region.Z = 0;
+	region.Width = width;
+	region.Height = height;
+	region.Depth = 1;
 
-	std::shared_ptr<Gpu::IEvent> DownloadEvent = Image->DownloadAsync(*ContextObject->GetDefaultQueue(),
-																	  State->mBaseBytes.data(),
-																	  State->mBaseBytes.size(),
-																	  Region);
+	std::shared_ptr<Gpu::IEvent> downloadEvent = mpImage->DownloadAsync(*contextObject->GetDefaultQueue(),
+																		state->mBaseBytes.data(),
+																		state->mBaseBytes.size(),
+																		region);
 
-	if (!DownloadEvent)
+	if (!downloadEvent)
 	{
-		AsyncTask(CallbackThread, [State]()
+		AsyncTask(callbackThread, [state]()
 		{
-			if (State->mCompletionCallback)
+			if (state->mCompletionCallback)
 			{
-				State->mCompletionCallback(false);
+				state->mCompletionCallback(false);
 			}
 		});
 		return false;
 	}
 
-	TWeakObjectPtr<UGPUImageObject> WeakThis(this);
-	TWeakObjectPtr<UGPUContextObject> WeakContext(ContextObject);
+	TWeakObjectPtr<UGPUImageObject> weakPtr(this);
+	TWeakObjectPtr<UGPUContextObject> weakContextPtr(contextObject);
 
-	DownloadEvent->SetCompletionCallback([WeakThis, WeakContext, State, Bpp, CallbackThread]()
+	downloadEvent->SetCompletionCallback([weakPtr, weakContextPtr, state, bpp, callbackThread]()
 	{
-		AsyncTask(CallbackThread, [WeakThis, WeakContext, State, Bpp, CallbackThread]()
+		AsyncTask(callbackThread, [weakPtr, weakContextPtr, state, bpp, callbackThread]()
 		{
-			UGPUImageObject* Self = WeakThis.Get();
-			if (!Self || !Self->Image || !State->mpTexture.IsValid())
+			UGPUImageObject* selfPtr = weakPtr.Get();
+			if (!selfPtr || !selfPtr->mpImage || !state->mpTexture.IsValid())
 			{
-				AsyncTask(CallbackThread, [State]()
+				AsyncTask(callbackThread, [state]()
 				{
-					if (State->mCompletionCallback)
+					if (state->mCompletionCallback)
 					{
-						State->mCompletionCallback(false);
+						state->mCompletionCallback(false);
 					}
 				});
 				return;
 			}
 
-			UTexture2D* Texture = State->mpTexture.Get();
-			FTexturePlatformData* PlatformData = Texture->GetPlatformData();
-
-			if (!PlatformData)
+			UTexture2D* texture = state->mpTexture.Get();
+			FTexturePlatformData* platformData = texture->GetPlatformData();
+			if (!platformData)
 			{
-				AsyncTask(ENamedThreads::GameThread, [State]()
+				AsyncTask(ENamedThreads::GameThread, [state]()
 				{
-					if (State->mCompletionCallback)
+					if (state->mCompletionCallback)
 					{
-						State->mCompletionCallback(false);
+						state->mCompletionCallback(false);
 					}
 				});
 				return;
 			}
 
-			const bool generateMips = Texture->MipGenSettings != TMGS_NoMipmaps;
+			const bool generateMips = texture->MipGenSettings != TMGS_NoMipmaps;
 			if (generateMips)
 			{
-				if (!Self->GenerateMipChain(Self->Image->GetFormat(),
-											State->mBaseBytes.data(),
-											Self->Image->GetWidth(),
-											Self->Image->GetHeight(),
-											1,
-											State->mMips))
+				if (!selfPtr->GenerateMipChain(selfPtr->mpImage->GetFormat(),
+											   state->mBaseBytes.data(),
+											   selfPtr->mpImage->GetWidth(),
+											   selfPtr->mpImage->GetHeight(),
+											   1,
+											   state->mMips))
 				{
-					AsyncTask(CallbackThread, [State]()
+					AsyncTask(callbackThread, [state]()
 					{
-						if (State->mCompletionCallback)
+						if (state->mCompletionCallback)
 						{
-							State->mCompletionCallback(false);
+							state->mCompletionCallback(false);
 						}
 					});
 					return;
@@ -662,72 +659,72 @@ bool UGPUImageObject::UpdateTexture2DAsync(UGPUContextObject* ContextObject,
 			}
 			else
 			{
-				RenderUtils::Mip BaseMip;
-				BaseMip.mWidth = Self->Image->GetWidth();
-				BaseMip.mHeight = Self->Image->GetHeight();
-				BaseMip.mSlices = 1;
-				BaseMip.mChannels = Self->GetChannelCount(Self->Image->GetFormat());
-				BaseMip.mPixels = State->mBaseBytes.data();
-				State->mMips.push_back(BaseMip);
+				RenderUtils::Mip baseMip;
+				baseMip.mWidth = selfPtr->mpImage->GetWidth();
+				baseMip.mHeight = selfPtr->mpImage->GetHeight();
+				baseMip.mSlices = 1;
+				baseMip.mChannels = selfPtr->GetChannelCount(selfPtr->mpImage->GetFormat());
+				baseMip.mPixels = state->mBaseBytes.data();
+				state->mMips.push_back(baseMip);
 			}
 
-			if (PlatformData->Mips.Num() != static_cast<int32>(State->mMips.size()))
+			if (platformData->Mips.Num() != static_cast<int32>(state->mMips.size()))
 			{
-				Self->FreeGeneratedMipChain(State->mMips);
+				selfPtr->FreeGeneratedMipChain(state->mMips);
 
-				AsyncTask(ENamedThreads::GameThread, [State]()
+				AsyncTask(ENamedThreads::GameThread, [state]()
 				{
-					if (State->mCompletionCallback)
+					if (state->mCompletionCallback)
 					{
-						State->mCompletionCallback(false);
+						state->mCompletionCallback(false);
 					}
 				});
 				return;
 			}
 
-			State->mRegions.resize(static_cast<int32>(State->mMips.size()));
-			State->mSrcPitches.resize(static_cast<int32>(State->mMips.size()));
-			State->mSrcBpps.resize(static_cast<int32>(State->mMips.size()));
+			state->mRegions.resize(static_cast<int32>(state->mMips.size()));
+			state->mSrcPitches.resize(static_cast<int32>(state->mMips.size()));
+			state->mSrcBpps.resize(static_cast<int32>(state->mMips.size()));
 
-			for (int32 MipIndex = 0; MipIndex < static_cast<int32>(State->mMips.size()); ++MipIndex)
+			for (int32 mipIndex = 0; mipIndex < static_cast<int32>(state->mMips.size()); ++mipIndex)
 			{
-				const RenderUtils::Mip& Mip = State->mMips[MipIndex];
+				const RenderUtils::Mip& Mip = state->mMips[mipIndex];
 
-				State->mRegions[MipIndex] = FUpdateTextureRegion2D(0,
+				state->mRegions[mipIndex] = FUpdateTextureRegion2D(0,
 																   0,
 																   0,
 																   0,
 																   static_cast<uint32>(Mip.mWidth),
 																   static_cast<uint32>(Mip.mHeight));
 
-				State->mSrcPitches[MipIndex] = static_cast<uint32>(Mip.mWidth * Bpp);
-				State->mSrcBpps[MipIndex] = static_cast<uint32>(Bpp);
+				state->mSrcPitches[mipIndex] = static_cast<uint32>(Mip.mWidth * bpp);
+				state->mSrcBpps[mipIndex] = static_cast<uint32>(bpp);
 			}
 
-			for (int32 MipIndex = 0; MipIndex < static_cast<int32>(State->mMips.size()); ++MipIndex)
+			for (int32 mipIndex = 0; mipIndex < static_cast<int32>(state->mMips.size()); ++mipIndex)
 			{
-				const RenderUtils::Mip& Mip = State->mMips[MipIndex];
+				const RenderUtils::Mip& Mip = state->mMips[mipIndex];
 
-				Texture->UpdateTextureRegions(MipIndex,
+				texture->UpdateTextureRegions(mipIndex,
 											  1,
-											  &State->mRegions[MipIndex],
-											  State->mSrcPitches[MipIndex],
-											  State->mSrcBpps[MipIndex],
+											  &state->mRegions[mipIndex],
+											  state->mSrcPitches[mipIndex],
+											  state->mSrcBpps[mipIndex],
 											  reinterpret_cast<uint8*>(Mip.mPixels),
-				[WeakThis, State, MipIndex, CallbackThread](uint8* SrcData, const FUpdateTextureRegion2D* Regions)
+				[weakPtr, state, mipIndex, callbackThread](uint8* SrcData, const FUpdateTextureRegion2D* Regions)
 				{
-					if (MipIndex == static_cast<int32>(State->mMips.size()) - 1)
+					if (mipIndex == static_cast<int32>(state->mMips.size()) - 1)
 					{
-						if (UGPUImageObject* Self = WeakThis.Get())
+						if (UGPUImageObject* Self = weakPtr.Get())
 						{
-							Self->FreeGeneratedMipChain(State->mMips);
+							Self->FreeGeneratedMipChain(state->mMips);
 						}
 
-						AsyncTask(CallbackThread, [State]()
+						AsyncTask(callbackThread, [state]()
 						{
-							if (State->mCompletionCallback)
+							if (state->mCompletionCallback)
 							{
-								State->mCompletionCallback(true);
+								state->mCompletionCallback(true);
 							}
 						});
 					}
@@ -739,49 +736,49 @@ bool UGPUImageObject::UpdateTexture2DAsync(UGPUContextObject* ContextObject,
 	return true;
 }
 
-bool UGPUImageObject::UpdateTexture2DArray(UGPUContextObject* ContextObject,
-										   UTexture2DArray* Texture)
+bool UGPUImageObject::UpdateTexture2DArray(UGPUContextObject* contextObject,
+										   UTexture2DArray* texture)
 {
-	if (!ValidateContextAndQueue(ContextObject) ||
-		!Texture ||
-		!Texture->GetPlatformData() ||
-		Image->GetType() != Gpu::ImageType::Tex2DArray)
+	if (!ValidateContextAndQueue(contextObject) ||
+		!texture ||
+		!texture->GetPlatformData() ||
+		mpImage->GetType() != Gpu::ImageType::Tex2DArray)
 	{
 		return false;
 	}
 
-	const bool generateMips = Texture->MipGenSettings != TMGS_NoMipmaps;
-	if (UpdateTexture_Internal(Texture->GetPlatformData(), ContextObject, generateMips))
+	const bool generateMips = texture->MipGenSettings != TMGS_NoMipmaps;
+	if (UpdateTexture_Internal(texture->GetPlatformData(), contextObject, generateMips))
 	{
-		Texture->UpdateResource();
+		texture->UpdateResource();
 		return true;
 	}
 	return false;
 }
 
-bool UGPUImageObject::UpdateVolumeTexture(UGPUContextObject* ContextObject,
-										  UVolumeTexture* Texture)
+bool UGPUImageObject::UpdateVolumeTexture(UGPUContextObject* contextObject,
+										  UVolumeTexture* texture)
 {
-	if (!ValidateContextAndQueue(ContextObject) ||
-		!Texture ||
-		!Texture->GetPlatformData() ||
-		Image->GetType() != Gpu::ImageType::Tex3D)
+	if (!ValidateContextAndQueue(contextObject) ||
+		!texture ||
+		!texture->GetPlatformData() ||
+		mpImage->GetType() != Gpu::ImageType::Tex3D)
 	{
 		return false;
 	}
 
-	const bool generateMips = Texture->MipGenSettings != TMGS_NoMipmaps;
-	if (UpdateTexture_Internal(Texture->GetPlatformData(), ContextObject, generateMips))
+	const bool generateMips = texture->MipGenSettings != TMGS_NoMipmaps;
+	if (UpdateTexture_Internal(texture->GetPlatformData(), contextObject, generateMips))
 	{
-		Texture->UpdateResource();
+		texture->UpdateResource();
 		return true;
 	}
 	return false;
 }
 
-Gpu::PixelFormat UGPUImageObject::ToNativePixelFormat(EGpuPixelFormat Format) const
+Gpu::PixelFormat UGPUImageObject::ToNativePixelFormat(EGpuPixelFormat format) const
 {
-	switch (Format)
+	switch (format)
 	{
 		case EGpuPixelFormat::R8:
 			return Gpu::PixelFormat::R8;
@@ -814,9 +811,9 @@ Gpu::PixelFormat UGPUImageObject::ToNativePixelFormat(EGpuPixelFormat Format) co
 	}
 }
 
-EGpuPixelFormat UGPUImageObject::FromNativePixelFormat(Gpu::PixelFormat Format) const
+EGpuPixelFormat UGPUImageObject::FromNativePixelFormat(Gpu::PixelFormat format) const
 {
-	switch (Format)
+	switch (format)
 	{
 		case Gpu::PixelFormat::R8:
 			return EGpuPixelFormat::R8;
@@ -849,9 +846,9 @@ EGpuPixelFormat UGPUImageObject::FromNativePixelFormat(Gpu::PixelFormat Format) 
 	}
 }
 
-EGpuImageType UGPUImageObject::FromNativeImageType(Gpu::ImageType Type) const
+EGpuImageType UGPUImageObject::FromNativeImageType(Gpu::ImageType type) const
 {
-	switch (Type)
+	switch (type)
 	{
 		case Gpu::ImageType::Tex2D:
 			return EGpuImageType::Tex2D;
@@ -864,9 +861,9 @@ EGpuImageType UGPUImageObject::FromNativeImageType(Gpu::ImageType Type) const
 	}
 }
 
-EPixelFormat UGPUImageObject::ToUEPixelFormat(Gpu::PixelFormat Format) const
+EPixelFormat UGPUImageObject::ToUEPixelFormat(Gpu::PixelFormat format) const
 {
-	switch (Format)
+	switch (format)
 	{
 		case Gpu::PixelFormat::R8:
 			return PF_G8;
@@ -899,9 +896,9 @@ EPixelFormat UGPUImageObject::ToUEPixelFormat(Gpu::PixelFormat Format) const
 	}
 }
 
-ETextureRenderTargetFormat UGPUImageObject::ToUERenderTargetPixelFormat(Gpu::PixelFormat Format) const
+ETextureRenderTargetFormat UGPUImageObject::ToUERenderTargetPixelFormat(Gpu::PixelFormat format) const
 {
-	switch (Format)
+	switch (format)
 	{
 		case Gpu::PixelFormat::R8:
 			return RTF_R8;
@@ -926,9 +923,9 @@ ETextureRenderTargetFormat UGPUImageObject::ToUERenderTargetPixelFormat(Gpu::Pix
 	}
 }
 
-size_t UGPUImageObject::GetBytesPerPixel(Gpu::PixelFormat Format) const
+size_t UGPUImageObject::GetBytesPerPixel(Gpu::PixelFormat format) const
 {
-	switch (Format)
+	switch (format)
 	{
 		case Gpu::PixelFormat::R8:
 			return 1;
@@ -961,17 +958,17 @@ size_t UGPUImageObject::GetBytesPerPixel(Gpu::PixelFormat Format) const
 	}
 }
 
-bool UGPUImageObject::ValidateContextAndQueue(UGPUContextObject* ContextObject) const
+bool UGPUImageObject::ValidateContextAndQueue(UGPUContextObject* contextObject) const
 {
-	return ContextObject &&
-           ContextObject->GetContext() &&
-           ContextObject->GetDefaultQueue() &&
-           Image != nullptr;
+	return contextObject &&
+           contextObject->GetContext() &&
+           contextObject->GetDefaultQueue() &&
+           mpImage != nullptr;
 }
 
-uint32 UGPUImageObject::GetChannelCount(Gpu::PixelFormat Format) const
+uint32 UGPUImageObject::GetChannelCount(Gpu::PixelFormat format) const
 {
-	switch (Format)
+	switch (format)
 	{
 		case Gpu::PixelFormat::R8:
 		case Gpu::PixelFormat::R16F:
@@ -1000,275 +997,269 @@ uint32 UGPUImageObject::GetChannelCount(Gpu::PixelFormat Format) const
 	}
 }
 
-bool UGPUImageObject::GenerateMipChain(Gpu::PixelFormat Format,
-									   uint8_t* SourceBytes,
-									   uint32_t Width,
-									   uint32_t Height,
-									   uint32_t Layers,
-									   std::vector<RenderUtils::Mip>& OutMips)
+bool UGPUImageObject::GenerateMipChain(Gpu::PixelFormat format,
+									   uint8_t* srcBytes,
+									   uint32_t width,
+									   uint32_t height,
+									   uint32_t layers,
+									   std::vector<RenderUtils::Mip>& output)
 {
-	const uint32 Channels = GetChannelCount(Format);
-	if (!SourceBytes || Channels == 0)
+	const uint32 channels = GetChannelCount(format);
+	if (!srcBytes || channels == 0)
 	{
 		return false;
 	}
 
-	switch (Format)
+	switch (format)
 	{
 		case Gpu::PixelFormat::R8:
 		case Gpu::PixelFormat::RG8:
 		case Gpu::PixelFormat::RGBA8:
 		{
-			RenderUtils::GenerateMipsInt8(OutMips,
-										  reinterpret_cast<uint8_t*>(SourceBytes),
-										  Width,
-										  Height,
-										  Layers,
-										  Channels);
+			RenderUtils::GenerateMipsUInt8(output,
+										   reinterpret_cast<uint8_t*>(srcBytes),
+										   width,
+										   height,
+										   layers,
+										   channels);
 			return true;
 		}
 		case Gpu::PixelFormat::R16F:
 		case Gpu::PixelFormat::RG16F:
 		case Gpu::PixelFormat::RGBA16F:
 		{
-			RenderUtils::GenerateMipsFloat16(OutMips,
-											 reinterpret_cast<FFloat16*>(SourceBytes),
-											 Width,
-											 Height,
-											 Layers,
-											 Channels);
+			RenderUtils::GenerateMipsFloat16(output,
+											 reinterpret_cast<FFloat16*>(srcBytes),
+											 width,
+											 height,
+											 layers,
+											 channels);
 			return true;
 		}
 		case Gpu::PixelFormat::R32F:
 		case Gpu::PixelFormat::RG32F:
 		case Gpu::PixelFormat::RGBA32F:
 		{
-			RenderUtils::GenerateMipsFloat(OutMips,
-										   reinterpret_cast<float*>(SourceBytes),
-										   Width,
-										   Height,
-										   Layers,
-										   Channels);
+			RenderUtils::GenerateMipsFloat(output,
+										   reinterpret_cast<float*>(srcBytes),
+										   width,
+										   height,
+										   layers,
+										   channels);
 			return true;
 		}
 		case Gpu::PixelFormat::R32U:
 		case Gpu::PixelFormat::RG32U:
 		case Gpu::PixelFormat::RGBA32U:
 		{
-			RenderUtils::GenerateMipsUInt32(OutMips,
-											reinterpret_cast<uint32_t*>(SourceBytes),
-											Width,
-											Height,
-											Layers,
-											Channels);
+			RenderUtils::GenerateMipsUInt32(output,
+											reinterpret_cast<uint32_t*>(srcBytes),
+											width,
+											height,
+											layers,
+											channels);
 			return true;
 		}
 		case Gpu::PixelFormat::R32S:
 		{
-			RenderUtils::GenerateMipsInt32(OutMips,
-										   reinterpret_cast<int32_t*>(SourceBytes),
-										   Width,
-										   Height,
-										   Layers,
-										   Channels);
+			RenderUtils::GenerateMipsInt32(output,
+										   reinterpret_cast<int32_t*>(srcBytes),
+										   width,
+										   height,
+										   layers,
+										   channels);
 			return true;
 		}
 		default:
+		{
 			return false;
+		}
 	}
 }
 
-void UGPUImageObject::FreeGeneratedMipChain(std::vector<RenderUtils::Mip>& Mips)
+void UGPUImageObject::FreeGeneratedMipChain(std::vector<RenderUtils::Mip>& mips)
 {
 	// Mip 0 points into the downloaded CPU byte array.
 	// Mips 1+ are allocated with new[] inside GenerateMip.
-	for (size_t i = 1; i < Mips.size(); ++i)
+	for (size_t i = 1; i < mips.size(); ++i)
 	{
-		delete[] Mips[i].mPixels;
-		Mips[i].mPixels = nullptr;
+		delete[] mips[i].mPixels;
+		mips[i].mPixels = nullptr;
 	}
 
-	Mips.clear();
+	mips.clear();
 }
 
-bool UGPUImageObject::FillPlatformDataFromMips(FTexturePlatformData* PlatformData,
-											   EPixelFormat UEFormat,
-											   const std::vector<RenderUtils::Mip>& Mips,
-											   size_t BytesPerPixel,
-											   uint32_t BaseWidth,
-											   uint32_t BaseHeight,
-											   uint32_t Layers)
+bool UGPUImageObject::FillPlatformDataFromMips(FTexturePlatformData* platformData,
+											   EPixelFormat format,
+											   const std::vector<RenderUtils::Mip>& mips,
+											   size_t bytesPerPixel,
+											   uint32_t baseWidth,
+											   uint32_t baseHeight,
+											   uint32_t layers)
 {
-	if (!PlatformData || Mips.empty() || BytesPerPixel == 0)
+	if (!platformData || mips.empty() || bytesPerPixel == 0)
 	{
 		return false;
 	}
 
-	PlatformData->SizeX = BaseWidth;
-	PlatformData->SizeY = BaseHeight;
-	PlatformData->SetNumSlices(Layers);
-	PlatformData->PixelFormat = UEFormat;
-	PlatformData->Mips.Empty();
+	platformData->SizeX = baseWidth;
+	platformData->SizeY = baseHeight;
+	platformData->SetNumSlices(layers);
+	platformData->PixelFormat = format;
+	platformData->Mips.Empty();
 
-	for (const RenderUtils::Mip& SrcMip : Mips)
+	for (const RenderUtils::Mip& srcMip : mips)
 	{
-		FTexture2DMipMap* DstMip = new FTexture2DMipMap();
-		PlatformData->Mips.Add(DstMip);
+		FTexture2DMipMap* dstMip = new FTexture2DMipMap();
+		platformData->Mips.Add(dstMip);
 
-		DstMip->SizeX = static_cast<int32>(SrcMip.mWidth);
-		DstMip->SizeY = static_cast<int32>(SrcMip.mHeight);
-		DstMip->SizeZ = static_cast<int32>(SrcMip.mSlices);
+		dstMip->SizeX = static_cast<int32>(srcMip.mWidth);
+		dstMip->SizeY = static_cast<int32>(srcMip.mHeight);
+		dstMip->SizeZ = static_cast<int32>(srcMip.mSlices);
 
-		const int64 MipBytes = static_cast<int64>(SrcMip.mWidth) *
-							   static_cast<int64>(SrcMip.mHeight) *
-							   static_cast<int64>(SrcMip.mSlices) *
-							   static_cast<int64>(BytesPerPixel);
+		const int64 MipBytes = static_cast<int64>(srcMip.mWidth) *
+							   static_cast<int64>(srcMip.mHeight) *
+							   static_cast<int64>(srcMip.mSlices) *
+							   static_cast<int64>(bytesPerPixel);
 
-		DstMip->BulkData.Lock(LOCK_READ_WRITE);
-		void* Dst = DstMip->BulkData.Realloc(MipBytes);
-		FMemory::Memcpy(Dst, SrcMip.mPixels, MipBytes);
-		DstMip->BulkData.Unlock();
+		dstMip->BulkData.Lock(LOCK_READ_WRITE);
+		void* dst = dstMip->BulkData.Realloc(MipBytes);
+		FMemory::Memcpy(dst, srcMip.mPixels, MipBytes);
+		dstMip->BulkData.Unlock();
 	}
 
 	return true;
 }
 
-bool UGPUImageObject::DownloadAndBuildMips(UGPUContextObject* ContextObject,
-										   bool bGenerateMips,
-										   TArray64<uint8_t>& OutBaseBytes,
-										   std::vector<RenderUtils::Mip>& OutMips)
+bool UGPUImageObject::DownloadAndBuildMips(UGPUContextObject* contextObject,
+										   bool benerateMips,
+										   TArray64<uint8_t>& outputBytes,
+										   std::vector<RenderUtils::Mip>& outputMips)
 {
-	if (!DownloadToCpuBytes(ContextObject, OutBaseBytes))
+	if (!DownloadToCpuBytes(contextObject, outputBytes))
 	{
 		return false;
 	}
 
-	const uint32 Width = Image->GetWidth();
-	const uint32 Height = Image->GetHeight();
-	const uint32 Layers = Image->GetType() == Gpu::ImageType::Tex2D ? 1 : Image->GetDepthOrLayers();
+	const uint32 width = mpImage->GetWidth();
+	const uint32 height = mpImage->GetHeight();
+	const uint32 layers = mpImage->GetType() == Gpu::ImageType::Tex2D ? 1 : mpImage->GetDepthOrLayers();
 
-	if (bGenerateMips)
+	if (benerateMips)
 	{
-		return GenerateMipChain(Image->GetFormat(),
-								OutBaseBytes.GetData(),
-								Width,
-								Height,
-								Layers,
-								OutMips);
+		return GenerateMipChain(mpImage->GetFormat(),
+								outputBytes.GetData(),
+								width,
+								height,
+								layers,
+								outputMips);
 	}
 
-	const uint32 Channels = GetChannelCount(Image->GetFormat());
+	const uint32 channels = GetChannelCount(mpImage->GetFormat());
 
-	RenderUtils::Mip BaseMip;
-	BaseMip.mWidth = Width;
-	BaseMip.mHeight = Height;
-	BaseMip.mSlices = Layers;
-	BaseMip.mChannels = Channels;
-	BaseMip.mPixels = OutBaseBytes.GetData();
+	RenderUtils::Mip baseMip;
+	baseMip.mWidth = width;
+	baseMip.mHeight = height;
+	baseMip.mSlices = layers;
+	baseMip.mChannels = channels;
+	baseMip.mPixels = outputBytes.GetData();
 
-	OutMips.clear();
-	OutMips.push_back(BaseMip);
+	outputMips.clear();
+	outputMips.push_back(baseMip);
 	return true;
 }
 
-bool UGPUImageObject::DownloadToCpuBytes(UGPUContextObject* ContextObject,
-										 TArray64<uint8>& OutBytes) const
+bool UGPUImageObject::DownloadToCpuBytes(UGPUContextObject* contextObject,
+										 TArray64<uint8>& output) const
 {
-	if (!ValidateContextAndQueue(ContextObject))
+	if (!ValidateContextAndQueue(contextObject))
     {
         return false;
     }
 
-    const size_t Bpp = GetBytesPerPixel(Image->GetFormat());
-    if (Bpp == 0)
+    const size_t bpp = GetBytesPerPixel(mpImage->GetFormat());
+    if (bpp == 0)
     {
         return false;
     }
 
-	Gpu::ImageRegion Region;
-    size_t TotalBytes = 0;
+	Gpu::ImageRegion region;
+    size_t totalBytes = 0;
 
-    switch (Image->GetType())
+    switch (mpImage->GetType())
     {
 		case Gpu::ImageType::Tex2D:
 		{
-		    Region = {0, 0, 0, Image->GetWidth(), Image->GetHeight(), 1};
-		    TotalBytes = static_cast<size_t>(Image->GetWidth()) * Image->GetHeight() * Bpp;
+		    region = {0, 0, 0, mpImage->GetWidth(), mpImage->GetHeight(), 1};
+		    totalBytes = static_cast<size_t>(mpImage->GetWidth()) * mpImage->GetHeight() * bpp;
 		    break;
 		}
 		case Gpu::ImageType::Tex2DArray:
 		case Gpu::ImageType::Tex3D:
 		{
-		    Region = {0, 0, 0, Image->GetWidth(), Image->GetHeight(), Image->GetDepthOrLayers()};
-		    TotalBytes = static_cast<size_t>(Image->GetWidth()) * Image->GetHeight() * Image->GetDepthOrLayers() * Bpp;
+		    region = {0, 0, 0, mpImage->GetWidth(), mpImage->GetHeight(), mpImage->GetDepthOrLayers()};
+		    totalBytes = static_cast<size_t>(mpImage->GetWidth()) * mpImage->GetHeight() * mpImage->GetDepthOrLayers() * bpp;
 		    break;
 		}
 		default:
 			return false;
     }
 
-    OutBytes.SetNumUninitialized(TotalBytes);
+    output.SetNumUninitialized(totalBytes);
 
-    return Image->Download(*ContextObject->GetDefaultQueue(),
-						   OutBytes.GetData(),
-						   TotalBytes,
-						   Region);
+    return mpImage->Download(*contextObject->GetDefaultQueue(),
+						   output.GetData(),
+						   totalBytes,
+						   region);
 }
 
-bool UGPUImageObject::UpdateTexture_Internal(FTexturePlatformData* PlatformData,
-											 UGPUContextObject* ContextObject,
-											 bool bGenerateMips)
+bool UGPUImageObject::UpdateTexture_Internal(FTexturePlatformData* platformData,
+											 UGPUContextObject* contextObject,
+											 bool generateMips)
 {
-	TArray64<uint8> BaseBytes;
-	std::vector<RenderUtils::Mip> Mips;
-	if (!DownloadAndBuildMips(ContextObject, bGenerateMips, BaseBytes, Mips))
+	TArray64<uint8> bytes;
+	std::vector<RenderUtils::Mip> mips;
+	if (!DownloadAndBuildMips(contextObject, generateMips, bytes, mips))
 	{
 		return false;
 	}
 
-	if (PlatformData->Mips.Num() != static_cast<int32>(Mips.size()))
+	if (platformData->Mips.Num() != static_cast<int32>(mips.size()))
 	{
-		FreeGeneratedMipChain(Mips);
+		FreeGeneratedMipChain(mips);
 		return false;
 	}
 
-	const size_t Bpp = GetBytesPerPixel(Image->GetFormat());
-	for (int32 MipIndex = 0; MipIndex < PlatformData->Mips.Num(); ++MipIndex)
+	const size_t bpp = GetBytesPerPixel(mpImage->GetFormat());
+	for (int32 mipIndex = 0; mipIndex < platformData->Mips.Num(); ++mipIndex)
 	{
-		const RenderUtils::Mip& SrcMip = Mips[MipIndex];
-		FTexture2DMipMap& DstMip = PlatformData->Mips[MipIndex];
+		const RenderUtils::Mip& src = mips[mipIndex];
+		FTexture2DMipMap& dst = platformData->Mips[mipIndex];
 
-		const int64 MipBytes = static_cast<int64>(SrcMip.mWidth) *
-							   static_cast<int64>(SrcMip.mHeight) *
-							   static_cast<int64>(SrcMip.mSlices) *
-							   static_cast<int64>(Bpp);
+		const int64 MipBytes = static_cast<int64>(src.mWidth) *
+							   static_cast<int64>(src.mHeight) *
+							   static_cast<int64>(src.mSlices) *
+							   static_cast<int64>(bpp);
 
-		void* DstData = DstMip.BulkData.Lock(LOCK_READ_WRITE);
-		if (!DstData)
+		void* dstData = dst.BulkData.Lock(LOCK_READ_WRITE);
+		if (!dstData)
 		{
-			FreeGeneratedMipChain(Mips);
+			FreeGeneratedMipChain(mips);
 			return false;
 		}
 
-		if (DstMip.BulkData.GetBulkDataSize() != MipBytes)
+		if (dst.BulkData.GetBulkDataSize() != MipBytes)
 		{
-			DstMip.BulkData.Unlock();
-			FreeGeneratedMipChain(Mips);
+			dst.BulkData.Unlock();
+			FreeGeneratedMipChain(mips);
 			return false;
 		}
 
-		FMemory::Memcpy(DstData, SrcMip.mPixels, MipBytes);
-		DstMip.BulkData.Unlock();
+		FMemory::Memcpy(dstData, src.mPixels, MipBytes);
+		dst.BulkData.Unlock();
 	}
 
-	FreeGeneratedMipChain(Mips);
+	FreeGeneratedMipChain(mips);
 	return true;
-}
-
-bool UGPUImageObject::UpdateTexture2DAsync_Internal(FTexturePlatformData* PlatformData,
-												    UGPUContextObject* ContextObject,
-												    bool bGenerateMips)
-{
-	// TODO:: Implement
-	return false;
 }

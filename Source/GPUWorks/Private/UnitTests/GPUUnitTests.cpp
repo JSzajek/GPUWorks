@@ -45,8 +45,8 @@ void FGPUUnitTestsSpecs::Define()
 		It("(1) Device Enumeration", [this]()
 		{
 			Gpu::FactoryDesc desc;
-			desc.PreferredBackend = Gpu::Backend::OpenCL;
-			desc.bAllowFallback = false;
+			desc.mPreferredBackend = Gpu::Backend::OpenCL;
+			desc.mAllowFallback = false;
 
 			std::shared_ptr<Gpu::ICore> core = Gpu::Factory::Create(desc);
 			TestTrue(TEXT("Invalid Device!"), core->GetDevice(0) != nullptr);
@@ -55,8 +55,8 @@ void FGPUUnitTestsSpecs::Define()
 		It("(2) Context Creation", [this]()
 		{
 			Gpu::FactoryDesc desc;
-			desc.PreferredBackend = Gpu::Backend::OpenCL;
-			desc.bAllowFallback = false;
+			desc.mPreferredBackend = Gpu::Backend::OpenCL;
+			desc.mAllowFallback = false;
 
 			std::shared_ptr<Gpu::ICore> core = Gpu::Factory::Create(desc);
 			std::shared_ptr<Gpu::IDevice> device = core->GetDevice(0);
@@ -68,8 +68,8 @@ void FGPUUnitTestsSpecs::Define()
 		It("(3) Command Queue Creation", [this]()
 		{
 			Gpu::FactoryDesc desc;
-			desc.PreferredBackend = Gpu::Backend::OpenCL;
-			desc.bAllowFallback = false;
+			desc.mPreferredBackend = Gpu::Backend::OpenCL;
+			desc.mAllowFallback = false;
 
 			std::shared_ptr<Gpu::ICore> core = Gpu::Factory::Create(desc);
 			std::shared_ptr<Gpu::IDevice> device = core->GetDevice(0);
@@ -89,8 +89,8 @@ void FGPUUnitTestsSpecs::Define()
 		BeforeEach([this]()
 		{
 			Gpu::FactoryDesc desc;
-			desc.PreferredBackend = Gpu::Backend::OpenCL;
-			desc.bAllowFallback = false;
+			desc.mPreferredBackend = Gpu::Backend::OpenCL;
+			desc.mAllowFallback = false;
 
 			mpCore = Gpu::Factory::Create(desc);
 			mpDevice = mpCore->GetDevice(0);
@@ -170,8 +170,8 @@ void FGPUUnitTestsSpecs::Define()
 		BeforeEach([this]()
 		{
 			Gpu::FactoryDesc desc;
-			desc.PreferredBackend = Gpu::Backend::OpenCL;
-			desc.bAllowFallback = false;
+			desc.mPreferredBackend = Gpu::Backend::OpenCL;
+			desc.mAllowFallback = false;
 
 			mpCore = Gpu::Factory::Create(desc);
 			mpDevice = mpCore->GetDevice(0);
@@ -192,25 +192,25 @@ void FGPUUnitTestsSpecs::Define()
 			std::vector<float> test_inout(count, 0.0f);
 
 			Gpu::BufferDescription bufferDescOut;
-			bufferDescOut.SizeBytes = count * sizeof(float);
-			bufferDescOut.AccessMode = Gpu::Access::WriteOnly;
-			bufferDescOut.SyncMode = Gpu::BufferSyncMode::CopyOnce;
-			bufferDescOut.InitialData = test_input.data();
+			bufferDescOut.mSizeBytes = count * sizeof(float);
+			bufferDescOut.mAccessMode = Gpu::Access::WriteOnly;
+			bufferDescOut.mSyncMode = Gpu::BufferSyncMode::CopyOnce;
+			bufferDescOut.mpInitialData = test_input.data();
 			std::shared_ptr<Gpu::IBuffer> bufferOutput = mpContext->CreateBuffer(bufferDescOut);
 			TestTrue(TEXT("Failed Write-Only Buffer Creation!"), bufferOutput != nullptr);
 
 			Gpu::BufferDescription bufferDescIn;
-			bufferDescIn.SizeBytes = count * sizeof(float);
-			bufferDescIn.AccessMode = Gpu::Access::ReadOnly;
-			bufferDescIn.SyncMode = Gpu::BufferSyncMode::Stream;
+			bufferDescIn.mSizeBytes = count * sizeof(float);
+			bufferDescIn.mAccessMode = Gpu::Access::ReadOnly;
+			bufferDescIn.mSyncMode = Gpu::BufferSyncMode::Stream;
 			std::shared_ptr<Gpu::IBuffer> bufferInput = mpContext->CreateBuffer(bufferDescIn);
 			TestTrue(TEXT("Failed Read-Only Buffer Creation!"), bufferInput != nullptr);
 
 			Gpu::BufferDescription bufferDescInOut;
-			bufferDescInOut.SizeBytes = count * sizeof(float);
-			bufferDescInOut.AccessMode = Gpu::Access::ReadWrite;
-			bufferDescInOut.SyncMode = Gpu::BufferSyncMode::Stream;
-			bufferDescInOut.InitialData = test_input.data();
+			bufferDescInOut.mSizeBytes = count * sizeof(float);
+			bufferDescInOut.mAccessMode = Gpu::Access::ReadWrite;
+			bufferDescInOut.mSyncMode = Gpu::BufferSyncMode::Stream;
+			bufferDescInOut.mpInitialData = test_input.data();
 			std::shared_ptr<Gpu::IBuffer> bufferInOut = mpContext->CreateBuffer(bufferDescInOut);
 			TestTrue(TEXT("Failed Read-Write Buffer Creation!"), bufferInOut != nullptr);
 		});
@@ -221,10 +221,10 @@ void FGPUUnitTestsSpecs::Define()
 			std::vector<float> input_data = { 30, 2, 45, 19, 54 };
 
 			Gpu::BufferDescription bufferDescInOut;
-			bufferDescInOut.SizeBytes = count * sizeof(float);
-			bufferDescInOut.AccessMode = Gpu::Access::ReadWrite;
-			bufferDescInOut.SyncMode = Gpu::BufferSyncMode::Stream;
-			bufferDescInOut.InitialData = input_data.data();
+			bufferDescInOut.mSizeBytes = count * sizeof(float);
+			bufferDescInOut.mAccessMode = Gpu::Access::ReadWrite;
+			bufferDescInOut.mSyncMode = Gpu::BufferSyncMode::Stream;
+			bufferDescInOut.mpInitialData = input_data.data();
 			std::shared_ptr<Gpu::IBuffer> bufferInOut = mpContext->CreateBuffer(bufferDescInOut);
 			TestTrue(TEXT("Failed Read-Write Buffer Creation!"), bufferInOut != nullptr);
 
@@ -255,10 +255,10 @@ void FGPUUnitTestsSpecs::Define()
 			TestTrue(TEXT("Invalid Program"), program != nullptr);
 
 			Gpu::BufferDescription bufferDescInOut;
-			bufferDescInOut.SizeBytes = count * sizeof(float);
-			bufferDescInOut.AccessMode = Gpu::Access::ReadWrite;
-			bufferDescInOut.SyncMode = Gpu::BufferSyncMode::Stream;
-			bufferDescInOut.InitialData = input_data.data();
+			bufferDescInOut.mSizeBytes = count * sizeof(float);
+			bufferDescInOut.mAccessMode = Gpu::Access::ReadWrite;
+			bufferDescInOut.mSyncMode = Gpu::BufferSyncMode::Stream;
+			bufferDescInOut.mpInitialData = input_data.data();
 			std::shared_ptr<Gpu::IBuffer> bufferInOut = mpContext->CreateBuffer(bufferDescInOut);
 			TestTrue(TEXT("Failed Read-Write Buffer Creation!"), bufferInOut != nullptr);
 
@@ -274,8 +274,8 @@ void FGPUUnitTestsSpecs::Define()
 			TestTrue(TEXT("Failed To Create Queue"), queue != nullptr);
 
 			Gpu::DispatchDescription dispatchDesc;
-			dispatchDesc.Dim = 1;
-			dispatchDesc.Global[0] = count;
+			dispatchDesc.mDim = 1;
+			dispatchDesc.mGlobal[0] = count;
 			queue->Dispatch(*kernel, dispatchDesc);
 			queue->Finish();
 
@@ -301,10 +301,10 @@ void FGPUUnitTestsSpecs::Define()
 			TestTrue(TEXT("Invalid Program"), program != nullptr);
 
 			Gpu::BufferDescription bufferDescInOut;
-			bufferDescInOut.SizeBytes = count * sizeof(float);
-			bufferDescInOut.AccessMode = Gpu::Access::ReadWrite;
-			bufferDescInOut.SyncMode = Gpu::BufferSyncMode::ZeroCopy;
-			bufferDescInOut.InitialData = input_data.data();
+			bufferDescInOut.mSizeBytes = count * sizeof(float);
+			bufferDescInOut.mAccessMode = Gpu::Access::ReadWrite;
+			bufferDescInOut.mSyncMode = Gpu::BufferSyncMode::ZeroCopy;
+			bufferDescInOut.mpInitialData = input_data.data();
 			std::shared_ptr<Gpu::IBuffer> bufferInOut = mpContext->CreateBuffer(bufferDescInOut);
 			TestTrue(TEXT("Failed Read-Write Buffer Creation!"), bufferInOut != nullptr);
 
@@ -318,8 +318,8 @@ void FGPUUnitTestsSpecs::Define()
 			TestTrue(TEXT("Failed To Create Queue"), queue != nullptr);
 
 			Gpu::DispatchDescription dispatchDesc;
-			dispatchDesc.Dim = 1;
-			dispatchDesc.Global[0] = count;
+			dispatchDesc.mDim = 1;
+			dispatchDesc.mGlobal[0] = count;
 			queue->Dispatch(*kernel, dispatchDesc);
 			queue->Finish();
 
@@ -344,8 +344,8 @@ void FGPUUnitTestsSpecs::Define()
 		BeforeEach([this]()
 		{
 			Gpu::FactoryDesc desc;
-			desc.PreferredBackend = Gpu::Backend::OpenCL;
-			desc.bAllowFallback = false;
+			desc.mPreferredBackend = Gpu::Backend::OpenCL;
+			desc.mAllowFallback = false;
 
 			mpCore = Gpu::Factory::Create(desc);
 			mpDevice = mpCore->GetDevice(0);
@@ -369,10 +369,10 @@ void FGPUUnitTestsSpecs::Define()
 			TestTrue(TEXT("Invalid Program"), program != nullptr);
 
 			Gpu::BufferDescription bufferDescInOut;
-			bufferDescInOut.SizeBytes = count * sizeof(float);
-			bufferDescInOut.AccessMode = Gpu::Access::ReadWrite;
-			bufferDescInOut.SyncMode = Gpu::BufferSyncMode::Stream;
-			bufferDescInOut.InitialData = input_data.data();
+			bufferDescInOut.mSizeBytes = count * sizeof(float);
+			bufferDescInOut.mAccessMode = Gpu::Access::ReadWrite;
+			bufferDescInOut.mSyncMode = Gpu::BufferSyncMode::Stream;
+			bufferDescInOut.mpInitialData = input_data.data();
 			std::shared_ptr<Gpu::IBuffer> bufferInOut = mpContext->CreateBuffer(bufferDescInOut);
 			TestTrue(TEXT("Failed Read-Write Buffer Creation!"), bufferInOut != nullptr);
 
@@ -389,8 +389,8 @@ void FGPUUnitTestsSpecs::Define()
 				return;
 
 			Gpu::DispatchDescription dispatchDesc;
-			dispatchDesc.Dim = 1;
-			dispatchDesc.Global[0] = count;
+			dispatchDesc.mDim = 1;
+			dispatchDesc.mGlobal[0] = count;
 			std::shared_ptr<Gpu::IEvent> event = queue->Dispatch(*kernel, dispatchDesc);
 			if (!TestTrue(TEXT("Failed To Dispatch"), event != nullptr))
 				return;
@@ -409,18 +409,18 @@ void FGPUUnitTestsSpecs::Define()
 			TestTrue(TEXT("Invalid Program"), program != nullptr);
 
 			Gpu::BufferDescription bufferDescIn;
-			bufferDescIn.SizeBytes = count * sizeof(float);
-			bufferDescIn.AccessMode = Gpu::Access::ReadOnly;
-			bufferDescIn.SyncMode = Gpu::BufferSyncMode::CopyOnce;
-			bufferDescIn.InitialData = input_data.data();
+			bufferDescIn.mSizeBytes = count * sizeof(float);
+			bufferDescIn.mAccessMode = Gpu::Access::ReadOnly;
+			bufferDescIn.mSyncMode = Gpu::BufferSyncMode::CopyOnce;
+			bufferDescIn.mpInitialData = input_data.data();
 			std::shared_ptr<Gpu::IBuffer> bufferIn = mpContext->CreateBuffer(bufferDescIn);
 			TestTrue(TEXT("Failed Read-Only Buffer Creation!"), bufferIn != nullptr);
 
 			Gpu::BufferDescription bufferDescInOut;
-			bufferDescInOut.SizeBytes = count * sizeof(float);
-			bufferDescInOut.AccessMode = Gpu::Access::ReadWrite;
-			bufferDescInOut.SyncMode = Gpu::BufferSyncMode::Stream;
-			bufferDescInOut.InitialData = input_data.data();
+			bufferDescInOut.mSizeBytes = count * sizeof(float);
+			bufferDescInOut.mAccessMode = Gpu::Access::ReadWrite;
+			bufferDescInOut.mSyncMode = Gpu::BufferSyncMode::Stream;
+			bufferDescInOut.mpInitialData = input_data.data();
 			std::shared_ptr<Gpu::IBuffer> bufferInOut = mpContext->CreateBuffer(bufferDescInOut);
 			TestTrue(TEXT("Failed Read-Write Buffer Creation!"), bufferInOut != nullptr);
 
@@ -444,8 +444,8 @@ void FGPUUnitTestsSpecs::Define()
 			size_t range = 2;
 
 			Gpu::DispatchDescription dispatchDesc;
-			dispatchDesc.Dim = 1;
-			dispatchDesc.Global[0] = range;
+			dispatchDesc.mDim = 1;
+			dispatchDesc.mGlobal[0] = range;
 			std::shared_ptr<Gpu::IEvent> event = queue->Dispatch(*kernel, dispatchDesc);
 			if (!TestTrue(TEXT("Failed Partial Dispatch"), event != nullptr))
 				return;
@@ -475,7 +475,7 @@ void FGPUUnitTestsSpecs::Define()
 
 
 			// Full Range -----------------------------------------------------
-			dispatchDesc.Global[0] = count;
+			dispatchDesc.mGlobal[0] = count;
 			event = queue->Dispatch(*kernel, dispatchDesc);
 			if (!TestTrue(TEXT("Failed Full Dispatch"), event != nullptr))
 				return;
@@ -507,8 +507,8 @@ void FGPUUnitTestsSpecs::Define()
 		BeforeEach([this]()
 		{
 			Gpu::FactoryDesc desc;
-			desc.PreferredBackend = Gpu::Backend::OpenCL;
-			desc.bAllowFallback = false;
+			desc.mPreferredBackend = Gpu::Backend::OpenCL;
+			desc.mAllowFallback = false;
 
 			mpCore = Gpu::Factory::Create(desc);
 			mpDevice = mpCore->GetDevice(0);
@@ -650,9 +650,9 @@ void FGPUUnitTestsSpecs::Define()
 				return;
 
 			Gpu::DispatchDescription dispatchDesc;
-			dispatchDesc.Dim = 2;
-			dispatchDesc.Global[0] = 256;
-			dispatchDesc.Global[1] = 256;
+			dispatchDesc.mDim = 2;
+			dispatchDesc.mGlobal[0] = 256;
+			dispatchDesc.mGlobal[1] = 256;
 			std::shared_ptr<Gpu::IEvent> event = queue->Dispatch(*kernel, dispatchDesc);
 			if (!TestTrue(TEXT("Failed To Dispatch"), event != nullptr))
 				return;
@@ -990,9 +990,9 @@ void FGPUUnitTestsSpecs::Define()
 				return;
 
 			Gpu::DispatchDescription dispatchDesc;
-			dispatchDesc.Dim = 2;
-			dispatchDesc.Global[0] = mDefaultUTextureWidth;
-			dispatchDesc.Global[1] = mDefaultUTextureHeight;
+			dispatchDesc.mDim = 2;
+			dispatchDesc.mGlobal[0] = mDefaultUTextureWidth;
+			dispatchDesc.mGlobal[1] = mDefaultUTextureHeight;
 			std::shared_ptr<Gpu::IEvent> event = mpGPUContextObj->GetDefaultQueue()->Dispatch(*program->GetKernel(), dispatchDesc);
 			if (!TestTrue(TEXT("Failed To Dispatch"), event != nullptr))
 				return;
