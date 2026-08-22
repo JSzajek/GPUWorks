@@ -65,6 +65,10 @@ namespace Gpu
             return mEndTimeNs > mStartTimeNs ? static_cast<float>(mEndTimeNs - mStartTimeNs) * 1.0e-6f : 0.0f;
         }
 
+		/// <summary>
+		/// Retrieves the total number of work groups dispatched for the kernel execution.
+		/// </summary>
+		/// <returns>The total number of work groups</returns>
         uint64 GetWorkGroupCount() const
         {
             uint64_t count = 1;

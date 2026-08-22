@@ -4,6 +4,9 @@
 
 namespace Gpu
 {
+    /// <summary>
+	/// Enum representing the level of support for Shared Virtual Memory (SVM) in a GPU device.
+    /// </summary>
     enum class SVMSupport : uint8_t
     {
         None = 0,
@@ -11,6 +14,9 @@ namespace Gpu
         Fine,
     };
 
+    /// <summary>
+	/// Struct representing the capabilities of a GPU device.
+    /// </summary>
     struct Capabilities
     {
         bool bSupportsImages = false;
