@@ -312,7 +312,9 @@ UTexture2D* UGPUImageObject::CreateTexture2D(UGPUContextObject* contextObject,
 
 	texture->NeverStream = true;
 	texture->SRGB = isSRGB;
+#if WITH_EDITOR
 	texture->MipGenSettings = generateMips ? TMGS_FromTextureGroup : TMGS_NoMipmaps;
+#endif
 
 	texture->SetPlatformData(new FTexturePlatformData());
 
@@ -407,7 +409,9 @@ UTexture2DArray* UGPUImageObject::CreateTexture2DArray(UGPUContextObject* contex
 
     texture->NeverStream = true;
     texture->SRGB = isSRGB;
+#if WITH_EDITOR
 	texture->MipGenSettings = generateMips ? TMGS_FromTextureGroup : TMGS_NoMipmaps;
+#endif
 
     texture->SetPlatformData(new FTexturePlatformData());
 
@@ -464,7 +468,9 @@ UVolumeTexture* UGPUImageObject::CreateVolumeTexture(UGPUContextObject* contextO
 
 	texture->NeverStream = true;
 	texture->SRGB = isSRGB;
+#if WITH_EDITOR
 	texture->MipGenSettings = generateMips ? TMGS_FromTextureGroup : TMGS_NoMipmaps;
+#endif
 	texture->SetPlatformData(new FTexturePlatformData());
 
 	const bool filled = FillPlatformDataFromMips(texture->GetPlatformData(),
@@ -511,7 +517,7 @@ bool UGPUImageObject::UpdateTexture2D(UGPUContextObject* contextObject,
 		return false;
 	}
 
-	const bool generateMips = texture->MipGenSettings != TMGS_NoMipmaps;
+	const bool generateMips = texture->GetNumMips() > 1;
 	if (UpdateTexture_Internal(texture->GetPlatformData(), contextObject, generateMips))
 	{
 		texture->UpdateResource();
@@ -637,7 +643,7 @@ bool UGPUImageObject::UpdateTexture2DAsync(UGPUContextObject* contextObject,
 				return;
 			}
 
-			const bool generateMips = texture->MipGenSettings != TMGS_NoMipmaps;
+			const bool generateMips = texture->GetNumMips() > 1;
 			if (generateMips)
 			{
 				if (!selfPtr->GenerateMipChain(selfPtr->mpImage->GetFormat(),
@@ -747,7 +753,7 @@ bool UGPUImageObject::UpdateTexture2DArray(UGPUContextObject* contextObject,
 		return false;
 	}
 
-	const bool generateMips = texture->MipGenSettings != TMGS_NoMipmaps;
+	const bool generateMips = texture->GetNumMips() > 1;
 	if (UpdateTexture_Internal(texture->GetPlatformData(), contextObject, generateMips))
 	{
 		texture->UpdateResource();
@@ -767,7 +773,7 @@ bool UGPUImageObject::UpdateVolumeTexture(UGPUContextObject* contextObject,
 		return false;
 	}
 
-	const bool generateMips = texture->MipGenSettings != TMGS_NoMipmaps;
+	const bool generateMips = texture->GetNumMips() > 1;
 	if (UpdateTexture_Internal(texture->GetPlatformData(), contextObject, generateMips))
 	{
 		texture->UpdateResource();
