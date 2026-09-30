@@ -13,15 +13,13 @@
 
 // Reference: https://minifloppy.it/posts/2024/automated-testing-specs-ue5/#writing-tests
 
-BEGIN_DEFINE_SPEC(FGPUUnitTestsSpecs, "CLWorks Unit Test",
+BEGIN_DEFINE_SPEC(FGPUUnitTestsSpecs, "GPUWorks Unit Test",
 				  EAutomationTestFlags::EditorContext | 
-				  EAutomationTestFlags::CommandletContext |
 				  EAutomationTestFlags::ProductFilter);
 
 // Variables and functions defined here will end up being member of
 // the FGPUUnitTestsSpecs class and will be accessible in the tests
 
-FString ModuleDirectory = IPluginManager::Get().FindPlugin("GPUWorks")->GetBaseDir();
 
 TUniquePtr<FTestUWorld> TestWorld = nullptr;
 
@@ -116,7 +114,8 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(2) Kernel Compilation - File", [this]()
 		{
-			const std::string moduleDirStr = std::string(TCHAR_TO_UTF8(*ModuleDirectory));
+			FString moduleDirectory = IPluginManager::Get().FindPlugin("GPUWorks")->GetBaseDir();
+			const std::string moduleDirStr = std::string(TCHAR_TO_UTF8(*moduleDirectory));
 
 			std::string buildLog;
 			std::shared_ptr<Gpu::IProgram> program = mpContext->CreateProgramFromFile(moduleDirStr + "/UnitTest/Shaders/add_vectors.cl",
@@ -152,8 +151,6 @@ void FGPUUnitTestsSpecs::Define()
 
 		It("(5) Invalid Argument", [this]()
 		{
-			const std::string moduleDirStr = std::string(TCHAR_TO_UTF8(*ModuleDirectory));
-
 			std::shared_ptr<Gpu::IProgram> program = mpContext->CreateProgramFromSource("__kernel void test(float a) { }");
 			TestTrue(TEXT("Invalid Program"), program != nullptr);
 
